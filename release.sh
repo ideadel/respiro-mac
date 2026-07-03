@@ -12,7 +12,7 @@ PORTAL="${SEVENWEB_PORTAL:-$(dirname "$0")/sevenweb-portal/public/downloads/resp
 
 mkdir -p "$DIST"
 ditto -c -k --keepParent "build/Respiro.app" "$DIST/$ZIP_NAME"
-shasum -a 256 "$DIST/$ZIP_NAME" | tee "$DIST/SHA256SUMS.txt"
+( cd "$DIST" && shasum -a 256 "$ZIP_NAME" | tee SHA256SUMS.txt )
 
 if [[ -d "$(dirname "$PORTAL")" ]]; then
   mkdir -p "$PORTAL"

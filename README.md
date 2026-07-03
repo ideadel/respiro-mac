@@ -2,7 +2,9 @@
 
 Utility macOS per pulizia e manutenzione del sistema — 100% locale, zero rete, zero telemetria.
 
-Distribuito gratuitamente su [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro).
+Distribuito gratuitamente su [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro) (mirror: [sevenweb-portal.vercel.app](https://sevenweb-portal.vercel.app/apps/respiro/)).
+
+Sorgente privato: [github.com/ideadel/respiro-mac](https://github.com/ideadel/respiro-mac)
 
 ## Build
 

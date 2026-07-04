@@ -76,7 +76,8 @@ Navigazione: sidebar → `Area` (5 aree) → chip bar → `Module`. Stato in `Ap
 | [docs/SERVICES.md](docs/SERVICES.md) | Servizi e responsabilità |
 | [docs/GRAPHIFY.md](docs/GRAPHIFY.md) | Comandi graphify per questo repo |
 | [docs/GRAPH_REPORT.md](docs/GRAPH_REPORT.md) | Report graphify (552 nodi, 36 community) |
-| [design/COPY-GUARDRAILS.md](design/COPY-GUARDRAILS.md) | Regole copy/UX |
+| [docs/QA-CHECKLIST.md](docs/QA-CHECKLIST.md) | Checklist manuale pre-release |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Versioni e note portale |
 
 ## Distribuzione
 

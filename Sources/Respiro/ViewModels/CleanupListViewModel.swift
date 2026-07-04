@@ -38,14 +38,17 @@ final class CleanupListViewModel: ObservableObject {
     func scan() async {
         phase = .scanning
         banner = nil
-        items = await scanner()
-        phase = .reviewing
+        var scanned = await scanner()
         if computesSizes {
-            let sizes = await sizeCalculator.sizes(for: items.map(\.url))
-            for index in items.indices {
-                items[index].sizeBytes = sizes[items[index].url]
+            let sizes = await sizeCalculator.sizes(for: scanned.map(\.url))
+            scanned = scanned.map { item in
+                var item = item
+                item.sizeBytes = sizes[item.url]
+                return item
             }
         }
+        items = scanned
+        phase = .reviewing
     }
 
     func toggle(_ item: CleanableItem) {

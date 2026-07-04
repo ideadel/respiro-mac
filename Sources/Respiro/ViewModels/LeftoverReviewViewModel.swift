@@ -38,12 +38,17 @@ final class LeftoverReviewViewModel: ObservableObject {
         phase = .loading
         auxiliaryIds = AppBundleInspector.auxiliaryBundleIds(of: app)
         appIsRunning = terminator.isRunning(bundleIds: processIds(for: app))
-        items = await finder.findLeftovers(for: app, allApps: allApps)
-        phase = .reviewing
-        let sizes = await sizeCalculator.totalSize(of: items)
-        for index in items.indices where items[index].sizeBytes == nil {
-            items[index].sizeBytes = sizes[items[index].id]
+        var loaded = await finder.findLeftovers(for: app, allApps: allApps)
+        let sizes = await sizeCalculator.totalSize(of: loaded)
+        loaded = loaded.map { item in
+            var item = item
+            if item.sizeBytes == nil {
+                item.sizeBytes = sizes[item.id]
+            }
+            return item
         }
+        items = loaded
+        phase = .reviewing
     }
 
     func toggleSelection(_ item: LeftoverItem) {

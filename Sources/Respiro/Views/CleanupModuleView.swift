@@ -15,10 +15,10 @@ struct CleanupModuleView: View {
             switch viewModel.phase {
             case .idle, .scanning:
                 scanning
-            case .reviewing:
+            case .reviewing, .removing:
                 reviewContent
-            case .removing:
-                ProgressView("Rimozione in corso…").frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .disabled(viewModel.phase == .removing)
+                    .overlay { removingOverlay }
             case .done:
                 doneView
             }
@@ -31,6 +31,30 @@ struct CleanupModuleView: View {
         ) {
             Button(actionLabel, role: .destructive) {
                 Task { await viewModel.performRemoval() }
+            }
+        }
+    }
+
+    private var removingOverlay: some View {
+        Group {
+            if viewModel.phase == .removing {
+                ZStack {
+                    Palette.sidebarGlass.opacity(0.35)
+                    VStack {
+                        Spacer()
+                        HStack(spacing: 10) {
+                            MelaMascot(size: 36, state: .scanning)
+                            ProgressView()
+                            Text("Rimozione in corso…")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Palette.textSecondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .glassCard()
+                        .padding(.bottom, 20)
+                    }
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Diario = Statistiche (charts) + Registro (per-file action log, exportable).
+/// Diario = Statistiche + Scia + Registro (per-file action log, exportable).
 struct DiaryView: View {
     @State private var tab = 0
 
@@ -9,15 +9,16 @@ struct DiaryView: View {
         VStack(spacing: 0) {
             Picker("", selection: $tab) {
                 Text("Statistiche").tag(0)
-                Text("Registro").tag(1)
+                Text("Scia").tag(1)
+                Text("Registro").tag(2)
             }
             .pickerStyle(.segmented)
-            .frame(width: 260)
+            .frame(width: 340)
             .padding(.top, 12)
-            if tab == 0 {
-                StatsView()
-            } else {
-                ActionLogView()
+            switch tab {
+            case 0: StatsView()
+            case 1: SciaView()
+            default: ActionLogView()
             }
         }
         .navigationTitle("Diario")

@@ -27,9 +27,9 @@ struct ContentView: View {
         NavigationSplitView {
             sidebar
                 .navigationSplitViewColumnWidth(min: Metrics.sidebarMin, ideal: 210)
-        } detail: {
+        }         detail: {
             areaView
-                .background(AuroraBackground())
+                .background(AuroraBackground(subdued: route.area != .respira))
         }
         .frame(minWidth: 900, minHeight: 560)
         .environmentObject(route)

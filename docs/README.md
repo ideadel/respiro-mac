@@ -29,7 +29,9 @@ Comandi: vedi [GRAPHIFY.md](GRAPHIFY.md).
 
 | File | Contenuto |
 |---|---|
-| `design/COPY-GUARDRAILS.md` | Regole vincolanti copy/UX |
+| [docs/CHANGELOG.md](CHANGELOG.md) | Versioni |
+| [docs/QA-CHECKLIST.md](QA-CHECKLIST.md) | Checklist pre-release |
+| [design/COPY-GUARDRAILS.md](../design/COPY-GUARDRAILS.md) | Regole copy/UX |
 | `design/CLAUDE-DESIGN-BRIEF.md` | Brief visivo |
 | `design/SEVENWEB-PORTAL-PROMPT.md` | Prompt portale sevenweb.tv |
 

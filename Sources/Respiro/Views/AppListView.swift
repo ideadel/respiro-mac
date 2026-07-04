@@ -24,9 +24,9 @@ struct AppListView: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(Array(viewModel.filteredApps.enumerated()), id: \.element) { index, app in
+                    ForEach(viewModel.filteredApps, id: \.id) { app in
                         appRow(app)
-                        if index < viewModel.filteredApps.count - 1 {
+                        if app.id != viewModel.filteredApps.last?.id {
                             Divider().overlay(Palette.border).padding(.leading, Metrics.cardPadding)
                         }
                     }
@@ -43,7 +43,7 @@ struct AppListView: View {
     }
 
     private func appRow(_ app: InstalledApp) -> some View {
-        let isSelected = selection == app
+        let isSelected = selection?.id == app.id
         return Button {
             selection = app
         } label: {

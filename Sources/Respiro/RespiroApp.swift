@@ -4,13 +4,7 @@ import AppKit
 @main
 struct RespiroApp: App {
     init() {
-        // CLI self-test: reuses the production scan path, exits before any UI.
-        if CommandLine.arguments.contains("--selftest-uninstaller") {
-            Task.detached {
-                exit(await UninstallerSelfTest.run() ? 0 : 1)
-            }
-            dispatchMain()
-        }
+        SelfTestRunner.runIfRequested()
     }
 
     var body: some Scene {

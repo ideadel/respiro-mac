@@ -11,8 +11,9 @@ struct UninstallerView: View {
             Group {
                 if let app = selectedApp {
                     LeftoverDetailView(app: app, allApps: appList.apps) {
+                        let removedId = app.id
                         selectedApp = nil
-                        Task { await appList.scan() }
+                        appList.removeApp(id: removedId)
                     }
                     .id(app.id)
                 } else {

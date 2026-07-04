@@ -7,4 +7,5 @@ sevenweb-portal/
 
 # Graphify (indice del codice per Claude Code / Cursor)
 graphify-out/
+Sources/Respiro/graphify-out/
 .graphify/

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 @MainActor
 final class AppListViewModel: ObservableObject {
@@ -15,7 +16,20 @@ final class AppListViewModel: ObservableObject {
 
     func scan() async {
         isScanning = true
-        apps = await scanner.scanInstalledApps()
-        isScanning = false
+        defer { isScanning = false }
+        let scanned = await scanner.scanInstalledApps()
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            apps = scanned
+        }
+    }
+
+    func removeApp(id: String) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            apps.removeAll { $0.id == id }
+        }
     }
 }

@@ -25,7 +25,7 @@ Mapping tra enum interni, UI utente e componenti Swift. I nomi **Respiro** sosti
 | `avvio` | Avvio | Elementi di login | `StartupView` | `StartupViewModel` |
 | `tagliando` | Tagliando | Manutenzione periodica | `MaintenanceView` | `MaintenanceViewModel` |
 | `guardia` | Guardia | Controlli di sicurezza | `CleanupModuleView` | `ProtectionScanner` |
-| `diario` | Diario | Statistiche e registro | `DiaryView` | `StatsView`, `ActionLogStore` |
+| `diario` | Diario | Statistiche e registro | `DiaryView` | `StatsView`, `SciaView`, `ActionLogStore` |
 
 ## Menu bar (fuori da `Module`)
 

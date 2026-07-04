@@ -62,9 +62,15 @@ actor ActionLogStore {
         }
     }
 
-    /// Export everything as CSV (Excel/Numbers-friendly) or pretty JSON.
-    func exportData(asCSV: Bool) -> Data? {
-        let records = all()
+    /// Export records as CSV or JSON, optionally limited to a date range.
+    func exportData(asCSV: Bool, since: Date? = nil, until: Date? = nil) -> Data? {
+        var records = all()
+        if let since {
+            records = records.filter { $0.date >= since }
+        }
+        if let until {
+            records = records.filter { $0.date <= until }
+        }
         if asCSV {
             let formatter = ISO8601DateFormatter()
             var csv = "data,modulo,percorso,byte,azione,esito\n"

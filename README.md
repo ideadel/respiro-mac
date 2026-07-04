@@ -42,6 +42,12 @@ Aggiornare il grafo codice dopo modifiche Swift:
 graphify update Sources/Respiro
 ```
 
+Verifica pre-release:
+
+```sh
+./scripts/verify.sh
+```
+
 ## Licenza
 
 Vedi [LICENSE](LICENSE). Uso gratuito; il sorgente resta privato.

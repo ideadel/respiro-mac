@@ -10,6 +10,22 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Accesso al disco") {
+                if FullDiskAccessChecker.hasFullDiskAccess {
+                    Label("Accesso completo al disco concesso", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(Palette.success)
+                } else {
+                    Label("Accesso completo al disco non concesso", systemImage: "exclamationmark.circle")
+                        .foregroundStyle(Palette.warning)
+                    Text("Senza questo permesso alcune cartelle di sistema restano illeggibili: Respiro te lo dirà onestamente, senza fingere che tutto sia pulito.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Palette.textSecondary)
+                    Button("Apri Impostazioni di Sistema…") {
+                        FullDiskAccessChecker.openSystemSettings()
+                    }
+                }
+            }
+
             Section {
                 Toggle("Avvia Respiro al login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { newValue in

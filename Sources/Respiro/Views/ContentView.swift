@@ -33,7 +33,6 @@ struct ContentView: View {
         }
         .frame(minWidth: 900, minHeight: 560)
         .environmentObject(route)
-        .onAppear { ApplicationBranding.apply() }
     }
 
     private var sidebar: some View {

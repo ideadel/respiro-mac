@@ -29,7 +29,18 @@ Copia lo zip in `../sevenweb-portal/public/downloads/respiro/` per il deploy del
 
 ## Moduli
 
-Smart Scan, Pulizia sistema, Cestino, Disinstallatore, Avvio, Manutenzione, File grandi, Duplicati, Space Lens, Protezione, Menu bar.
+Respira, Aria, Cestino, Zavorra (Ingombranti + Doppioni), Panorama, Trasloco, Avvio, Tagliando, Guardia, Diario — più Menu bar.
+
+## Documentazione (agenti AI)
+
+- [AGENTS.md](AGENTS.md) — entry point per Cursor/Claude
+- [docs/](docs/) — architettura, moduli, servizi, graphify
+
+Aggiornare il grafo codice dopo modifiche Swift:
+
+```sh
+graphify update Sources/Respiro
+```
 
 ## Licenza
 

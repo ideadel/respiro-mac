@@ -31,7 +31,7 @@
 	<key>SUFeedURL</key>
 	<string>https://sevenweb.tv/downloads/respiro/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>REPLACE_WITH_SPARKLE_PUBLIC_KEY</string>
+	<string>Cu1DVko05QC2DtNfKYiXAyO5w9g7lPrZQ1hImEDfwqM=</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<false/>
 </dict>

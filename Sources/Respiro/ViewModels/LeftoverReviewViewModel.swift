@@ -3,10 +3,11 @@ import Foundation
 @MainActor
 final class LeftoverReviewViewModel: ObservableObject {
     enum Phase: Equatable {
-        case loading, reviewing, removing, done
+        case reviewing, removing, done
     }
 
-    @Published var phase: Phase = .loading
+    @Published var phase: Phase = .reviewing
+    @Published var isLoading = false
     @Published var items: [LeftoverItem] = []
     @Published var results: [RemovalResult] = []
     @Published var appRemoved = false
@@ -21,6 +22,7 @@ final class LeftoverReviewViewModel: ObservableObject {
     private let privilegedService = PrivilegedRemovalService()
     private let terminator = AppTerminator()
     private var auxiliaryIds: Set<String> = []
+    private var loadedAppId: String?
 
     var selectedItems: [LeftoverItem] { items.filter(\.isSelected) }
     var selectedSize: Int64 { selectedItems.compactMap(\.sizeBytes).reduce(0, +) }
@@ -35,7 +37,10 @@ final class LeftoverReviewViewModel: ObservableObject {
     }
 
     func load(app: InstalledApp, allApps: [InstalledApp] = []) async {
-        phase = .loading
+        if loadedAppId == app.id, !items.isEmpty { return }
+
+        isLoading = true
+        phase = .reviewing
         auxiliaryIds = AppBundleInspector.auxiliaryBundleIds(of: app)
         appIsRunning = terminator.isRunning(bundleIds: processIds(for: app))
         var loaded = await finder.findLeftovers(for: app, allApps: allApps)
@@ -48,7 +53,8 @@ final class LeftoverReviewViewModel: ObservableObject {
             return item
         }
         items = loaded
-        phase = .reviewing
+        loadedAppId = app.id
+        isLoading = false
     }
 
     func toggleSelection(_ item: LeftoverItem) {

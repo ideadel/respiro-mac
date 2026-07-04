@@ -5,6 +5,7 @@ import AppKit
 struct RespiroApp: App {
     init() {
         SelfTestRunner.runIfRequested()
+        ApplicationBranding.apply()
     }
 
     var body: some Scene {
@@ -15,6 +16,7 @@ struct RespiroApp: App {
                     BackgroundScanScheduler.shared.start()
                 }
         }
+        .windowStyle(.automatic)
         .commands {
             CommandGroup(after: .appInfo) {
                 if UpdaterService.shared.isActive {
@@ -34,6 +36,14 @@ struct RespiroApp: App {
         } label: {
             MenuBarLabel()
         }
+    }
+}
+
+/// Keeps the menu bar and About panel on "Respiro" even if the .app bundle
+/// was renamed "Respiro 2.app" by macOS after a duplicate install.
+enum ApplicationBranding {
+    static func apply() {
+        NSApplication.shared.mainMenu?.items.first?.title = "Respiro"
     }
 }
 
@@ -59,16 +69,33 @@ struct MenuBarLabel: View {
 
 struct MenuBarView: View {
     @Environment(\.openWindow) private var openWindow
+    @State private var snapshot = SystemMetricsService.snapshot()
 
     var body: some View {
-        if let stats = DiskUsageService.volumeStats() {
-            Text("Spazio libero: \(formatBytes(stats.free)) di \(formatBytes(stats.total))")
+        Group {
+            if let free = snapshot.diskFree, let total = snapshot.diskTotal {
+                Text("Spazio libero: \(formatBytes(free)) di \(formatBytes(total))")
+            }
+            if let mem = snapshot.memory {
+                Text("RAM disponibile: \(formatBytes(mem.availableBytes)) di \(formatBytes(mem.totalBytes))")
+            }
+            if let cpu = snapshot.cpuLoadPercent {
+                Text(String(format: "CPU: %.0f%% carico medio", cpu))
+            }
+            Button("Apri Respiro") {
+                openWindow(id: "main")
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            Divider()
+            Button("Esci") { NSApp.terminate(nil) }
         }
-        Button("Apri Respiro") {
-            openWindow(id: "main")
-            NSApp.activate(ignoringOtherApps: true)
+        .onAppear { refresh() }
+        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+            refresh()
         }
-        Divider()
-        Button("Esci") { NSApp.terminate(nil) }
+    }
+
+    private func refresh() {
+        snapshot = SystemMetricsService.snapshot()
     }
 }

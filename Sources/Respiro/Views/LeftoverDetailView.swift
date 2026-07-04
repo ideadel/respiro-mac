@@ -2,35 +2,31 @@ import SwiftUI
 
 struct LeftoverDetailView: View {
     let app: InstalledApp
+    @ObservedObject var viewModel: LeftoverReviewViewModel
     var allApps: [InstalledApp] = []
     var onUninstalled: () -> Void
-
-    @StateObject private var viewModel = LeftoverReviewViewModel()
 
     var body: some View {
         Group {
             switch viewModel.phase {
-            case .loading:
-                VStack(spacing: 12) {
-                    MelaMascot(size: 80, state: .scanning)
-                    Text("Ricerca residui…")
-                        .foregroundStyle(Palette.textSecondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            case .reviewing, .removing:
-                reviewContent
-                    .disabled(viewModel.phase == .removing)
-                    .overlay { removingOverlay }
             case .done:
                 RemovalResultView(results: viewModel.results,
                                   banner: viewModel.errorBanner,
                                   appRemoved: viewModel.appRemoved,
                                   showLoginItemsNote: viewModel.hadLoginItemHints,
                                   onClose: onUninstalled)
+            case .reviewing, .removing:
+                reviewContent
+                    .disabled(viewModel.isLoading || viewModel.phase == .removing)
+                    .overlay { loadingOverlay }
+                    .overlay { removingOverlay }
             }
         }
+        .transaction { $0.animation = nil }
         .navigationTitle(app.displayName)
-        .task { await viewModel.load(app: app, allApps: allApps) }
+        .task(id: app.id) {
+            await viewModel.load(app: app, allApps: allApps)
+        }
         .sheet(isPresented: $viewModel.showConfirmSheet) {
             ConfirmRemovalSheet(
                 appName: app.displayName,
@@ -53,6 +49,22 @@ struct LeftoverDetailView: View {
             Button("Annulla", role: .cancel) {}
         } message: {
             Text("\(app.displayName) non si è chiusa entro pochi secondi. Vuoi forzarne la chiusura e continuare la disinstallazione?")
+        }
+    }
+
+    private var loadingOverlay: some View {
+        Group {
+            if viewModel.isLoading {
+                ZStack {
+                    Palette.sidebarGlass.opacity(0.5)
+                    VStack(spacing: 12) {
+                        MelaMascot(size: 72, state: .scanning)
+                        Text("Ricerca residui…")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Palette.textSecondary)
+                    }
+                }
+            }
         }
     }
 
@@ -83,7 +95,7 @@ struct LeftoverDetailView: View {
     private var reviewContent: some View {
         VStack(spacing: 14) {
             header
-            if viewModel.items.isEmpty {
+            if viewModel.items.isEmpty && !viewModel.isLoading {
                 Spacer()
                 VStack(spacing: 12) {
                     MelaMascot(size: 80, state: .happy)
@@ -92,8 +104,10 @@ struct LeftoverDetailView: View {
                         .multilineTextAlignment(.center)
                 }
                 Spacer()
-            } else {
+            } else if !viewModel.items.isEmpty {
                 itemList
+            } else {
+                Spacer()
             }
         }
     }
@@ -113,6 +127,7 @@ struct LeftoverDetailView: View {
                 Button("Disinstalla…") { viewModel.showConfirmSheet = true }
                     .buttonStyle(.primaryCTA)
                     .keyboardShortcut(.defaultAction)
+                    .disabled(viewModel.isLoading)
                 Text("\(viewModel.selectedItems.count) elementi · \(Self.formatBytes(viewModel.selectedSize))")
                     .font(.system(size: 11))
                     .monospacedDigit()
@@ -140,9 +155,9 @@ struct LeftoverDetailView: View {
                         .padding(.horizontal, Metrics.cardPadding)
                         .padding(.vertical, 10)
                         Divider().overlay(Palette.border)
-                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        ForEach(items, id: \.id) { item in
                             itemRow(item)
-                            if index < items.count - 1 {
+                            if item.id != items.last?.id {
                                 Divider().overlay(Palette.border).padding(.leading, Metrics.cardPadding)
                             }
                         }
@@ -196,8 +211,6 @@ struct LeftoverDetailView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Palette.textSecondary)
                     .monospacedDigit()
-            } else {
-                ProgressView().controlSize(.small)
             }
         }
         .padding(.horizontal, Metrics.cardPadding)

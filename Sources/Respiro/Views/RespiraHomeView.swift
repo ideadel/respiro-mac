@@ -58,6 +58,9 @@ struct RespiraHomeView: View {
 
             timeline
 
+            SystemVitalsView()
+                .padding(.top, 4)
+
             Spacer(minLength: 8)
             Text("Numeri veri: spazio reale misurato ora, mai stime gonfiate. Niente lascia il tuo Mac.")
                 .font(.system(size: 11))

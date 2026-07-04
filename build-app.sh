@@ -54,4 +54,5 @@ codesign --force -s - "$APP"
 
 echo "✅ Build completata: $PWD/$APP"
 echo "   Apri con: open $APP"
+echo "   Se vedi «Respiro 2» nel menu, elimina le copie vecchie in /Applications e ~/Applications."
 echo "   Ricorda: concedi Full Disk Access in Impostazioni di Sistema → Privacy e Sicurezza."

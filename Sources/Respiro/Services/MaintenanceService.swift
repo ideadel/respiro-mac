@@ -44,6 +44,10 @@ final class MaintenanceService {
                         isAvailable: FileManager.default.fileExists(atPath: "/usr/sbin/periodic")),
     ]
 
+    static var ramPurgeTask: MaintenanceTask? {
+        tasks.first { $0.id == "purge" && $0.isAvailable }
+    }
+
     func run(_ task: MaintenanceTask) async throws {
         if task.needsAdmin {
             try await ElevatedCommandRunner().run(task.command)

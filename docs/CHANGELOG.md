@@ -1,5 +1,18 @@
 # Changelog Respiro
 
+## 1.1.1 (2026-07-04)
+
+### Stabilità
+- Fix lampeggio Trasloco (cache ViewModel, overlay loading, rimozione locale senza rescan)
+
+### Feature
+- **Vitali del Mac** su Respira — disco, RAM disponibile, carico CPU
+- Scorciatoia **Libera RAM** (+ link Tagliando) nella card Vitali
+- Menu bar: RAM disponibile e CPU oltre allo spazio disco
+- Nome app forzato a **Respiro** nel menu (anche con bundle «Respiro 2.app»)
+
+---
+
 ## 1.1.0 (2026-07-04)
 
 ### Stabilità

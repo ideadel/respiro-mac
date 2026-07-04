@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Disk, RAM and CPU on Respira — with honest shortcuts to free memory.
 struct SystemVitalsView: View {
-    @EnvironmentObject private var route: AppRoute
+    var onOpenTagliando: () -> Void = {}
     @State private var snapshot = SystemMetricsService.snapshot()
     @State private var isPurging = false
     @State private var purgeMessage: String?
@@ -90,7 +90,7 @@ struct SystemVitalsView: View {
             .disabled(isPurging)
             .help("Equivalente di «purge» — chiede la password amministratore.")
             Button("Tagliando") {
-                route.open(.tagliando)
+                onOpenTagliando()
             }
             .buttonStyle(.plain)
             .font(.system(size: 11))

@@ -24,32 +24,42 @@ struct ContentView: View {
     @StateObject private var spaceLensVM = SpaceLensViewModel()
 
     var body: some View {
-        NavigationSplitView {
-            sidebar
-                .navigationSplitViewColumnWidth(min: Metrics.sidebarMin, ideal: 210)
-        }         detail: {
-            areaView
-                .background(AuroraBackground(subdued: route.area != .respira))
+        ZStack {
+            AuroraBackground(subdued: route.area != .respira)
+            HStack(spacing: 0) {
+                sidebar
+                    .frame(width: 210)
+                Divider()
+                    .overlay(Palette.border)
+                areaView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
         .frame(minWidth: 900, minHeight: 560)
+        .respiroWindow()
         .environmentObject(route)
     }
 
     private var sidebar: some View {
-        List(selection: Binding(
-            get: { route.area },
-            set: { newValue in route.selectArea(newValue ?? .respira) }
-        ) as Binding<Area?>) {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Respiro")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(Palette.accent.opacity(0.9))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 2)
             ForEach(Area.allCases) { area in
-                SidebarRow(area: area, isSelected: route.area == area)
-                    .tag(area)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
-                    .listRowBackground(Color.clear)
+                Button {
+                    route.selectArea(area)
+                } label: {
+                    SidebarRow(area: area, isSelected: route.area == area)
+                }
+                .buttonStyle(.plain)
             }
+            Spacer(minLength: 0)
         }
-        .scrollContentBackground(.hidden)
+        .padding(.top, Metrics.titleBarSafeArea)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(Palette.sidebarGlass.background(.ultraThinMaterial))
-        .navigationTitle("Respiro")
     }
 
     @ViewBuilder
@@ -58,7 +68,7 @@ struct ContentView: View {
             if route.area.modules.count > 1 {
                 ModuleChipBar(modules: route.area.modules, selection: $route.module)
                     .padding(.horizontal, Metrics.windowPadding)
-                    .padding(.top, 10)
+                    .padding(.top, Metrics.titleBarSafeArea)
             }
             moduleView
         }
@@ -193,15 +203,16 @@ struct SidebarRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(area.title)
                     .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(isSelected ? Palette.accent : Palette.textPrimary)
                 Text(area.subtitle)
                     .font(.system(size: 10))
                     .foregroundStyle(Palette.textSecondary)
             }
         }
-        .foregroundStyle(isSelected ? Palette.accent : Palette.textSecondary)
         .padding(.vertical, 6)
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isSelected ? Palette.accentTint : .clear)

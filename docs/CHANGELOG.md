@@ -1,5 +1,17 @@
 # Changelog Respiro
 
+## 1.1.3 (2026-07-04)
+
+### UI
+- Sidebar stabile (layout HStack) — voci Respira, Spazio, App, Energia, Diario sempre visibili
+- Finestra immersiva: title bar trasparente nativa, aurora full-bleed, vetro sopra
+- Scorciatoia Libera RAM su Respira (fix EnvironmentObject)
+
+### Dev
+- `./scripts/run-local.sh` — build e apri locale senza release
+
+---
+
 ## 1.1.2 (2026-07-04)
 
 ### Fix

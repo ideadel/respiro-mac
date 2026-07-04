@@ -58,7 +58,7 @@ struct RespiraHomeView: View {
 
             timeline
 
-            SystemVitalsView()
+            SystemVitalsView(onOpenTagliando: { route.open(.tagliando) })
                 .padding(.top, 4)
 
             Spacer(minLength: 8)

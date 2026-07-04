@@ -60,6 +60,8 @@ enum Metrics {
     static let buttonRadius: CGFloat = 7
     static let rowHeight: CGFloat = 44
     static let sidebarMin: CGFloat = 180
+    /// Space below traffic lights when using transparent title bar.
+    static let titleBarSafeArea: CGFloat = 28
 }
 
 // MARK: - Reusable style pieces

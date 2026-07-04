@@ -15,6 +15,7 @@ Vincoli tecnici: SwiftUI puro, macOS 13+, SF Pro, SF Symbols, min 900×560, `Nav
 | Colore accent | Verde Respiro — junk mai rosso |
 | Motion | Spring su chip/checkbox; mai pulse su conteggi o progress teatrali |
 | Glass | Card e sidebar con `.ultraThinMaterial` |
+| Finestra | Title bar trasparente nativa, aurora full-bleed, vetro sopra |
 
 ## Architettura UI (5 aree)
 

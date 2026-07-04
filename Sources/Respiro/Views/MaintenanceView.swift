@@ -9,12 +9,12 @@ struct MaintenanceView: View {
             taskList
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Manutenzione")
+        .navigationTitle("Tagliando")
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Manutenzione")
+            Text("Tagliando")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(Palette.textPrimary)
             Text("Attività di manutenzione del sistema. Quelle con il lucchetto richiedono la password di amministratore.")

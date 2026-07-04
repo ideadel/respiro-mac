@@ -72,6 +72,13 @@ final class CleanupListViewModel: ObservableObject {
                 bytesFreed: freedItems.compactMap(\.sizeBytes).reduce(0, +),
                 itemCount: freedItems.count
             )
+            let sizeByURL = Dictionary(uniqueKeysWithValues: selected.compactMap { item in
+                item.sizeBytes.map { (item.url, $0) }
+            })
+            await ActionLogStore.shared.append(
+                ActionLogStore.records(module: historyLabel, action: "trashed",
+                                       results: removalResults, sizes: sizeByURL)
+            )
         }
     }
 }

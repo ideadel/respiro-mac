@@ -22,6 +22,10 @@ final class MaintenanceViewModel: ObservableObject {
         } catch {
             statuses[task.id] = .failure(error.localizedDescription)
         }
+        await ActionLogStore.shared.append([
+            ActionRecord(date: Date(), module: "tagliando", path: task.id, bytes: 0,
+                         action: "maintenanceTask", success: statuses[task.id] == .success)
+        ])
         runningTaskID = nil
     }
 }

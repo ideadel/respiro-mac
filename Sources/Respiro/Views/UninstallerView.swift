@@ -22,13 +22,13 @@ struct UninstallerView: View {
             .frame(minWidth: 400, maxWidth: .infinity)
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Disinstallatore")
+        .navigationTitle("Trasloco")
         .task { await appList.scan() }
     }
 
     private var emptyState: some View {
         VStack(spacing: 12) {
-            Image(systemName: Module.uninstaller.icon)
+            Image(systemName: Module.trasloco.icon)
                 .font(.system(size: 40))
                 .foregroundStyle(Palette.accent)
             Text("Seleziona un'app da disinstallare")

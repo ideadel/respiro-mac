@@ -84,4 +84,20 @@ extension CleaningHistoryStore {
         decoder.dateDecodingStrategy = .iso8601
         return decoder
     }()
+
+    /// Records use stable machine keys; this maps them (and the legacy v1
+    /// Italian labels already in users' history.json) to the current lexicon,
+    /// so old charts keep working after renames.
+    nonisolated static func displayName(forLabel label: String) -> String {
+        switch label {
+        case "aria", "Pulizia sistema": return "Aria"
+        case "cestino", "Cestino": return "Cestino"
+        case "zavorra", "File grandi", "Duplicati": return "Zavorra"
+        case "panorama", "Space Lens": return "Panorama"
+        case "trasloco", "Disinstallatore": return "Trasloco"
+        case "guardia", "Protezione": return "Guardia"
+        case "tagliando", "Manutenzione": return "Tagliando"
+        default: return label
+        }
+    }
 }

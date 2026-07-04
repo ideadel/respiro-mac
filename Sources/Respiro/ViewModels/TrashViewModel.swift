@@ -40,7 +40,12 @@ final class TrashViewModel: ObservableObject {
         let countBefore = itemCount
         await refresh()
         let freed = max(0, before - (sizeBytes ?? 0))
-        await CleaningHistoryStore.shared.record(module: "Cestino", bytesFreed: freed,
+        await CleaningHistoryStore.shared.record(module: "cestino", bytesFreed: freed,
                                                  itemCount: max(0, countBefore - itemCount))
+        // The Trash is emptied in bulk: one aggregate log entry, not thousands.
+        await ActionLogStore.shared.append([
+            ActionRecord(date: Date(), module: "cestino", path: trashURL.path,
+                         bytes: freed, action: "emptiedTrash", success: failures == 0)
+        ])
     }
 }

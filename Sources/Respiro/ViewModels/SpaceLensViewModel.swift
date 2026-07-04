@@ -34,8 +34,12 @@ final class SpaceLensViewModel: ObservableObject {
         }
         do {
             try FileManager.default.trashItem(at: entry.url, resultingItemURL: nil)
-            await CleaningHistoryStore.shared.record(module: "Space Lens",
+            await CleaningHistoryStore.shared.record(module: "panorama",
                                                      bytesFreed: entry.sizeBytes, itemCount: 1)
+            await ActionLogStore.shared.append([
+                ActionRecord(date: Date(), module: "panorama", path: entry.url.path,
+                             bytes: entry.sizeBytes, action: "trashed", success: true)
+            ])
             entries.removeAll { $0.id == entry.id }
         } catch {
             message = "Impossibile spostare nel Cestino: \(error.localizedDescription)"

@@ -108,6 +108,7 @@ struct LeftoverDetailView: View {
                             Text(category.displayName)
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(Palette.textPrimary)
+                            WhyBadge(text: category.explanation)
                             Spacer()
                             Text(formatBytes(items.compactMap(\.sizeBytes).reduce(0, +)))
                                 .font(.system(size: 12))

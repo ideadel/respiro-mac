@@ -19,7 +19,6 @@ struct StatsView: View {
             }
             .padding(Metrics.windowPadding)
         }
-        .navigationTitle("Statistiche")
         .task {
             await CleaningHistoryStore.shared.snapshotFreeSpaceIfNeeded()
             history = await CleaningHistoryStore.shared.history()
@@ -43,9 +42,10 @@ struct StatsView: View {
         var keys: [String: (Date, String)] = [:]
         for record in history.records where record.date >= cutoff {
             let day = Calendar.current.startOfDay(for: record.date)
-            let key = "\(day.timeIntervalSince1970)|\(record.module)"
+            let module = CleaningHistoryStore.displayName(forLabel: record.module)
+            let key = "\(day.timeIntervalSince1970)|\(module)"
             totals[key, default: 0] += record.bytesFreed
-            keys[key] = (day, record.module)
+            keys[key] = (day, module)
         }
         return keys.compactMap { key, value in
             totals[key].map { (day: value.0, module: value.1, bytes: $0) }
@@ -53,7 +53,8 @@ struct StatsView: View {
     }
 
     private var moduleTotals: [(module: String, bytes: Int64)] {
-        Dictionary(grouping: history.records, by: \.module)
+        Dictionary(grouping: history.records,
+                   by: { CleaningHistoryStore.displayName(forLabel: $0.module) })
             .map { (module: $0.key, bytes: $0.value.map(\.bytesFreed).reduce(0, +)) }
             .filter { $0.bytes > 0 }
             .sorted { $0.bytes > $1.bytes }

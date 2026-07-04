@@ -97,6 +97,9 @@ struct CleanupModuleView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Text(group).font(.system(size: 12, weight: .semibold)).foregroundStyle(Palette.textPrimary)
+                            if let explanation = Explanations.explanation(forJunkGroup: group) {
+                                WhyBadge(text: explanation)
+                            }
                             Spacer()
                             Text(formatBytes(groupItems.compactMap(\.sizeBytes).reduce(0, +)))
                                 .font(.system(size: 12)).monospacedDigit().foregroundStyle(Palette.textSecondary)
@@ -230,6 +233,36 @@ struct CleanupModuleView: View {
         }
         .padding(Metrics.windowPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// ⓘ "Perché questo file?" — popover with the honest explanation of what a
+/// category is and what happens if it goes.
+struct WhyBadge: View {
+    let text: String
+    @State private var showing = false
+
+    var body: some View {
+        Button {
+            showing.toggle()
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.system(size: 11))
+                .foregroundStyle(Palette.textSecondary)
+        }
+        .buttonStyle(.plain)
+        .help("Perché questo file?")
+        .popover(isPresented: $showing, arrowEdge: .bottom) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Perché questo file?")
+                    .font(.system(size: 12, weight: .semibold))
+                Text(text)
+                    .font(.system(size: 12))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(14)
+            .frame(width: 300)
+        }
     }
 }
 

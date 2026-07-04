@@ -56,27 +56,28 @@ struct MelaMascot: View {
                     .frame(width: 74 * unit, height: 52 * unit)
                     .position(x: 50 * unit, y: 38 * unit)
 
-                // Eyes
+                // Eyes (bottom edge y=39: keeps 2 units of clear gap above
+                // the smile stroke, which visually starts at y≈41)
                 Capsule().fill(face)
                     .frame(width: 8 * unit, height: 12 * unit)
-                    .position(x: (39 + eyeShift) * unit, y: 36 * unit)
+                    .position(x: (39 + eyeShift) * unit, y: 33 * unit)
                 Capsule().fill(face)
                     .frame(width: 8 * unit, height: 12 * unit)
-                    .position(x: (61 + eyeShift) * unit, y: 36 * unit)
+                    .position(x: (61 + eyeShift) * unit, y: 33 * unit)
 
-                // Blush cheeks
+                // Blush cheeks (outward of the smile's rounded end-caps)
                 Ellipse().fill(blush)
                     .frame(width: 9 * unit, height: 5 * unit)
-                    .position(x: 36 * unit, y: 45 * unit)
+                    .position(x: 34 * unit, y: 44 * unit)
                 Ellipse().fill(blush)
                     .frame(width: 9 * unit, height: 5 * unit)
-                    .position(x: 64 * unit, y: 45 * unit)
+                    .position(x: 66 * unit, y: 44 * unit)
 
                 // Smile
                 Smile()
                     .stroke(face, style: StrokeStyle(lineWidth: 4 * unit, lineCap: .round))
                     .frame(width: 22 * unit, height: 10 * unit)
-                    .position(x: 50 * unit, y: 46 * unit)
+                    .position(x: 50 * unit, y: 48 * unit)
 
                 // Keyboard deck / base
                 Capsule().fill(laptopGreen)

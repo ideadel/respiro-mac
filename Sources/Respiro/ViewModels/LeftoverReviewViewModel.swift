@@ -141,10 +141,24 @@ final class LeftoverReviewViewModel: ObservableObject {
         let succeeded = Set(allResults.filter(\.success).map(\.url))
         let freedItems = selected.filter { succeeded.contains($0.url) }
         await CleaningHistoryStore.shared.record(
-            module: "Disinstallatore",
+            module: "trasloco",
             bytesFreed: freedItems.compactMap(\.sizeBytes).reduce(0, +),
             itemCount: freedItems.count + (appRemoved ? 1 : 0)
         )
+        let sizeByURL = Dictionary(uniqueKeysWithValues: selected.compactMap { item in
+            item.sizeBytes.map { (item.url, $0) }
+        })
+        let elevatedURLs = Set(elevated.map(\.url))
+        let receiptURLs = Set(receipts.map(\.url))
+        await ActionLogStore.shared.append(allResults.map { result in
+            let action: String
+            if receiptURLs.contains(result.url) { action = "pkgForget" }
+            else if elevatedURLs.contains(result.url) { action = "deletedElevated" }
+            else { action = "trashed" }
+            return ActionRecord(date: Date(), module: "trasloco", path: result.url.path,
+                                bytes: sizeByURL[result.url] ?? 0, action: action,
+                                success: result.success)
+        })
     }
 
     private func processIds(for app: InstalledApp) -> [String] {

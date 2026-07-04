@@ -33,6 +33,17 @@ if [[ -d ".build/release/Respiro_Respiro.bundle" ]]; then
   cp -R ".build/release/Respiro_Respiro.bundle" "$APP/Contents/Resources/"
 fi
 
+# Embed Sparkle.framework (SwiftPM binary artifact) for auto-updates.
+SPARKLE_FW=$(find .build/artifacts -type d -name "Sparkle.framework" -path "*macos*" 2>/dev/null | head -1)
+[[ -z "$SPARKLE_FW" ]] && SPARKLE_FW=$(find .build/artifacts -type d -name "Sparkle.framework" 2>/dev/null | head -1)
+if [[ -n "$SPARKLE_FW" ]]; then
+  mkdir -p "$APP/Contents/Frameworks"
+  cp -R "$SPARKLE_FW" "$APP/Contents/Frameworks/"
+  codesign --force -s - "$APP/Contents/Frameworks/Sparkle.framework"
+else
+  echo "⚠️  Sparkle.framework non trovato in .build/artifacts — l'app non potrà auto-aggiornarsi."
+fi
+
 # Install the app icon.
 if [[ -f "$ICON_ICNS" ]]; then
   cp "$ICON_ICNS" "$APP/Contents/Resources/AppIcon.icns"

@@ -1,7 +1,7 @@
 import Foundation
 
 enum Module: String, CaseIterable, Identifiable, Hashable {
-    case smartScan, systemJunk, trash, uninstaller, startup, maintenance,
+    case smartScan, stats, systemJunk, trash, uninstaller, startup, maintenance,
          largeFiles, duplicates, spaceLens, protection
 
     var id: String { rawValue }
@@ -9,6 +9,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
     var title: String {
         switch self {
         case .smartScan: return "Smart Scan"
+        case .stats: return "Statistiche"
         case .systemJunk: return "Pulizia sistema"
         case .trash: return "Cestino"
         case .uninstaller: return "Disinstallatore"
@@ -24,6 +25,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
     var icon: String {
         switch self {
         case .smartScan: return "sparkles"
+        case .stats: return "chart.bar.xaxis"
         case .systemJunk: return "internaldrive"
         case .trash: return "trash"
         case .uninstaller: return "app.dashed"
@@ -53,7 +55,7 @@ struct ModuleSection: Identifiable {
     var id: String { title }
 
     static let all: [ModuleSection] = [
-        ModuleSection(title: "Riepilogo", modules: [.smartScan]),
+        ModuleSection(title: "Riepilogo", modules: [.smartScan, .stats]),
         ModuleSection(title: "Pulizia", modules: [.systemJunk, .trash]),
         ModuleSection(title: "Applicazioni", modules: [.uninstaller]),
         ModuleSection(title: "Velocità", modules: [.startup, .maintenance]),

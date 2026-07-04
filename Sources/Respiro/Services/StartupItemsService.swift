@@ -70,7 +70,10 @@ final class StartupItemsService {
         switch item.domain {
         case .userAgent:
             let gui = "gui/\(getuid())"
-            _ = try await ProcessRunner.run("/bin/launchctl", [verb, "\(gui)/\(item.label)"])
+            let (status, _, stderr) = try await ProcessRunner.run("/bin/launchctl", [verb, "\(gui)/\(item.label)"])
+            guard status == 0 else {
+                throw RemovalError(message: "launchctl \(verb) fallito (codice \(status)): \(stderr)")
+            }
             // Best effort: apply immediately without waiting for next login.
             if disabled {
                 _ = try? await ProcessRunner.run("/bin/launchctl", ["bootout", "\(gui)/\(item.label)"])

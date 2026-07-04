@@ -61,6 +61,11 @@ struct SpaceLensView: View {
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
             }
+            if let message = viewModel.message {
+                Text(message)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.warning)
+            }
         }
     }
 
@@ -71,6 +76,8 @@ struct SpaceLensView: View {
                 ForEach(Array(viewModel.entries.enumerated()), id: \.element.id) { index, entry in
                     SpaceLensRow(entry: entry, maxSize: maxSize, index: index) {
                         if entry.isDirectory { viewModel.load(entry.url) }
+                    } onTrash: {
+                        Task { await viewModel.moveToTrash(entry) }
                     }
                     if index < viewModel.entries.count - 1 {
                         Divider().overlay(Palette.border).padding(.leading, Metrics.cardPadding)
@@ -87,6 +94,7 @@ private struct SpaceLensRow: View {
     let maxSize: Int64
     let index: Int
     let onOpen: () -> Void
+    var onTrash: () -> Void = {}
     @State private var progress: CGFloat = 0
 
     var body: some View {
@@ -117,6 +125,10 @@ private struct SpaceLensRow: View {
         .contextMenu {
             Button("Mostra nel Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
             if entry.isDirectory { Button("Apri qui", action: onOpen) }
+            if SpaceLensViewModel.canTrash(entry.url) {
+                Divider()
+                Button("Sposta nel Cestino", role: .destructive, action: onTrash)
+            }
         }
     }
 }

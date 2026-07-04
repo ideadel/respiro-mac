@@ -3,9 +3,36 @@ import AppKit
 
 @main
 struct RespiroApp: App {
+    init() {
+        // CLI self-test: reuses the production scan path, exits before any UI.
+        if CommandLine.arguments.contains("--selftest-uninstaller") {
+            Task.detached {
+                exit(await UninstallerSelfTest.run() ? 0 : 1)
+            }
+            dispatchMain()
+        }
+    }
+
     var body: some Scene {
         WindowGroup(id: "main") {
             ContentView()
+                .task {
+                    await CleaningHistoryStore.shared.snapshotFreeSpaceIfNeeded()
+                    BackgroundScanScheduler.shared.start()
+                }
+        }
+        .commands {
+            CommandGroup(after: .appInfo) {
+                if UpdaterService.shared.isActive {
+                    Button("Controlla aggiornamenti…") {
+                        UpdaterService.shared.checkForUpdates()
+                    }
+                }
+            }
+        }
+
+        Settings {
+            SettingsView()
         }
 
         MenuBarExtra {

@@ -10,7 +10,7 @@ struct UninstallerView: View {
                 .frame(minWidth: 220, idealWidth: 260, maxWidth: 340)
             Group {
                 if let app = selectedApp {
-                    LeftoverDetailView(app: app) {
+                    LeftoverDetailView(app: app, allApps: appList.apps) {
                         selectedApp = nil
                         Task { await appList.scan() }
                     }

@@ -3,7 +3,10 @@ import Foundation
 enum LeftoverCategory: String, CaseIterable, Identifiable {
     case preferences, caches, appSupport, logs, savedState, containers,
          groupContainers, launchAgentsUser, httpStorages, webkit, cookies,
-         launchAgentsSystem, launchDaemons, systemAppSupport, systemPreferences
+         applicationScripts, crashReports, services, internetPlugins,
+         audioPlugins, quickLook, prefPanes,
+         launchAgentsSystem, launchDaemons, systemAppSupport, systemPreferences,
+         privilegedHelpers, systemCaches, systemLogs, pkgReceipts
 
     var id: String { rawValue }
 
@@ -20,26 +23,39 @@ enum LeftoverCategory: String, CaseIterable, Identifiable {
         case .httpStorages: return "HTTPStorages"
         case .webkit: return "WebKit"
         case .cookies: return "Cookie"
+        case .applicationScripts: return "Script applicazione"
+        case .crashReports: return "Report di crash"
+        case .services: return "Servizi"
+        case .internetPlugins: return "Plug-in Internet"
+        case .audioPlugins: return "Plug-in audio"
+        case .quickLook: return "QuickLook"
+        case .prefPanes: return "Pannelli preferenze"
         case .launchAgentsSystem: return "LaunchAgents (sistema)"
         case .launchDaemons: return "LaunchDaemons"
         case .systemAppSupport: return "Application Support (sistema)"
         case .systemPreferences: return "Preferenze (sistema)"
+        case .privilegedHelpers: return "Helper privilegiati"
+        case .systemCaches: return "Cache (sistema)"
+        case .systemLogs: return "Log (sistema)"
+        case .pkgReceipts: return "Ricevute pacchetti (pkg)"
         }
     }
 
     var sortOrder: Int { Self.allCases.firstIndex(of: self) ?? 0 }
 }
 
-enum MatchReason {
+enum MatchReason: Equatable {
     case bundleIdExact
     case bundleIdPrefix
     case nameMatch
     case plistLabelMatch
+    case helperBundleId
+    case vendorMatch
 
     var isHighConfidence: Bool {
         switch self {
-        case .bundleIdExact, .bundleIdPrefix, .plistLabelMatch: return true
-        case .nameMatch: return false
+        case .bundleIdExact, .bundleIdPrefix, .plistLabelMatch, .helperBundleId: return true
+        case .nameMatch, .vendorMatch: return false
         }
     }
 
@@ -49,8 +65,22 @@ enum MatchReason {
         case .bundleIdPrefix: return "bundle id"
         case .plistLabelMatch: return "label"
         case .nameMatch: return "solo nome"
+        case .helperBundleId: return "helper"
+        case .vendorMatch: return "fornitore"
         }
     }
+}
+
+/// A receipt is "removed" via `pkgutil --forget`, not by trashing a file.
+enum LeftoverKind: Equatable {
+    case file
+    case packageReceipt(String)
+}
+
+/// Which launchd domain a job must be booted out of before its files go away.
+enum LaunchdDomain: Equatable {
+    case userGui
+    case system
 }
 
 struct LeftoverItem: Identifiable {
@@ -61,4 +91,7 @@ struct LeftoverItem: Identifiable {
     var isSelected: Bool = true
     let requiresElevation: Bool
     let matchReason: MatchReason
+    var kind: LeftoverKind = .file
+    var launchdLabel: String?
+    var launchdDomain: LaunchdDomain?
 }

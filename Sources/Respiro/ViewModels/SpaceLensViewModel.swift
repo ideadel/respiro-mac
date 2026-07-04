@@ -5,9 +5,42 @@ final class SpaceLensViewModel: ObservableObject {
     @Published var currentDirectory = FileManager.default.homeDirectoryForCurrentUser
     @Published var entries: [DiskEntry] = []
     @Published var isLoading = false
+    @Published var message: String?
 
     private let service = DiskUsageService()
     private var loadTask: Task<Void, Never>?
+
+    /// Space Lens browses the whole volume, so deletion gets its own guard
+    /// instead of DenyList's search-root allowlist: only strict descendants
+    /// of the user's home can be trashed, never the home or ~/Library roots.
+    nonisolated static func canTrash(_ url: URL) -> Bool {
+        if DenyList.isBlockedPath(url) { return false }
+        let resolved = url.resolvingSymlinksInPath().standardizedFileURL
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
+        let components = resolved.pathComponents
+        let homeComponents = home.pathComponents
+        guard components.count > homeComponents.count,
+              Array(components.prefix(homeComponents.count)) == homeComponents
+        else { return false }
+        let library = home.appendingPathComponent("Library").standardizedFileURL
+        return resolved != library
+    }
+
+    func moveToTrash(_ entry: DiskEntry) async {
+        message = nil
+        guard Self.canTrash(entry.url) else {
+            message = "Per sicurezza Space Lens può cestinare solo elementi dentro la tua cartella Inizio."
+            return
+        }
+        do {
+            try FileManager.default.trashItem(at: entry.url, resultingItemURL: nil)
+            await CleaningHistoryStore.shared.record(module: "Space Lens",
+                                                     bytesFreed: entry.sizeBytes, itemCount: 1)
+            entries.removeAll { $0.id == entry.id }
+        } catch {
+            message = "Impossibile spostare nel Cestino: \(error.localizedDescription)"
+        }
+    }
 
     func loadIfNeeded() {
         if entries.isEmpty && !isLoading { load() }

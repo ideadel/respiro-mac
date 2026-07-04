@@ -28,5 +28,11 @@
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Respiro richiede privilegi di amministratore via AppleScript per rimuovere file di sistema durante la disinstallazione.</string>
+	<key>SUFeedURL</key>
+	<string>https://sevenweb.tv/downloads/respiro/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>REPLACE_WITH_SPARKLE_PUBLIC_KEY</string>
+	<key>SUEnableInstallerLauncherService</key>
+	<false/>
 </dict>
 </plist>

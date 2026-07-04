@@ -4,6 +4,7 @@ struct RemovalResultView: View {
     let results: [RemovalResult]
     let banner: String?
     let appRemoved: Bool
+    var showLoginItemsNote: Bool = false
     var onClose: () -> Void
 
     var body: some View {
@@ -55,6 +56,13 @@ struct RemovalResultView: View {
             }
             .frame(maxHeight: 280)
             .glassCard()
+
+            if showLoginItemsNote {
+                Text("Se l'app compariva in Elementi di login, verifica in Impostazioni di Sistema › Generali › Elementi di login.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             HStack {
                 Button("Mostra nel Cestino") {

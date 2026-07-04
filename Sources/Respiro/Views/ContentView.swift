@@ -3,14 +3,19 @@ import SwiftUI
 struct ContentView: View {
     @State private var selection: Module? = .smartScan
 
-    @StateObject private var junkVM = CleanupListViewModel { await JunkScanner().scan() }
-    @StateObject private var largeFilesVM = CleanupListViewModel(computesSizes: false) {
+    @StateObject private var junkVM = CleanupListViewModel(historyLabel: "Pulizia sistema") {
+        await JunkScanner().scan()
+    }
+    @StateObject private var largeFilesVM = CleanupListViewModel(computesSizes: false,
+                                                                 historyLabel: "File grandi") {
         await LargeFilesScanner().scan()
     }
-    @StateObject private var duplicatesVM = CleanupListViewModel(computesSizes: false) {
+    @StateObject private var duplicatesVM = CleanupListViewModel(computesSizes: false,
+                                                                 historyLabel: "Duplicati") {
         await DuplicateScanner().scan()
     }
-    @StateObject private var protectionVM = CleanupListViewModel(computesSizes: false) {
+    @StateObject private var protectionVM = CleanupListViewModel(computesSizes: false,
+                                                                 historyLabel: "Protezione") {
         await ProtectionScanner().scan()
     }
     @StateObject private var trashVM = TrashViewModel()
@@ -58,6 +63,8 @@ struct ContentView: View {
         case .smartScan:
             SmartScanView(junk: junkVM, trash: trashVM, protection: protectionVM,
                           startup: startupVM, selection: $selection)
+        case .stats:
+            StatsView()
         case .systemJunk:
             CleanupModuleView(
                 title: "Pulizia sistema",

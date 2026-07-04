@@ -4,3 +4,9 @@ dist/
 .DS_Store
 .cursor/
 sevenweb-portal/
+
+# Graphify (indice del codice per Claude Code / Cursor)
+graph.html
+graph.json
+GRAPH_REPORT.md
+.graphify/

@@ -10,9 +10,11 @@ struct CleanupEngine {
         var banner: String?
         if !elevated.isEmpty {
             do {
-                try await PrivilegedRemovalService().removeElevated(paths: elevated.map(\.url))
+                let outcome = try await PrivilegedRemovalService().removeElevated(paths: elevated.map(\.url))
                 results += elevated.map {
-                    RemovalResult(url: $0.url, category: nil, success: true, errorDescription: nil)
+                    let removed = outcome.removedPaths.contains($0.url.path)
+                    return RemovalResult(url: $0.url, category: nil, success: removed,
+                                         errorDescription: removed ? nil : "Il file non è stato rimosso")
                 }
             } catch {
                 if case ElevationError.userCancelled = error {

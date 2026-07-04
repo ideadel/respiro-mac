@@ -5,6 +5,8 @@ struct ConfirmRemovalSheet: View {
     let itemCount: Int
     let totalSize: Int64
     let elevatedCount: Int
+    var receiptCount: Int = 0
+    var appIsRunning: Bool = false
     var onConfirm: () -> Void
     var onCancel: () -> Void
 
@@ -23,6 +25,18 @@ struct ConfirmRemovalSheet: View {
                           systemImage: "lock.fill")
                         .font(.system(size: 13))
                         .foregroundStyle(Palette.warning)
+                }
+                if receiptCount > 0 {
+                    Label("\(receiptCount) ricevute di installazione verranno dimenticate (pkgutil).",
+                          systemImage: "doc.badge.gearshape")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Palette.textSecondary)
+                }
+                if appIsRunning {
+                    Label("Respiro chiuderà l'app prima di rimuoverla.",
+                          systemImage: "power")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Palette.textSecondary)
                 }
                 Text("Tutti gli elementi restano recuperabili dal Cestino.")
                     .font(.system(size: 11))

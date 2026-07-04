@@ -15,11 +15,15 @@ final class CleanupListViewModel: ObservableObject {
 
     private let scanner: () async -> [CleanableItem]
     private let computesSizes: Bool
+    /// Module name recorded in the cleaning history (nil = don't record).
+    private let historyLabel: String?
     private let engine = CleanupEngine()
     private let sizeCalculator = SizeCalculator()
 
-    init(computesSizes: Bool = true, scanner: @escaping () async -> [CleanableItem]) {
+    init(computesSizes: Bool = true, historyLabel: String? = nil,
+         scanner: @escaping () async -> [CleanableItem]) {
         self.computesSizes = computesSizes
+        self.historyLabel = historyLabel
         self.scanner = scanner
     }
 
@@ -55,9 +59,19 @@ final class CleanupListViewModel: ObservableObject {
 
     func performRemoval() async {
         phase = .removing
-        let (removalResults, removalBanner) = await engine.remove(items: selectedItems)
+        let selected = selectedItems
+        let (removalResults, removalBanner) = await engine.remove(items: selected)
         results = removalResults
         banner = removalBanner
         phase = .done
+        if let historyLabel {
+            let succeeded = Set(removalResults.filter(\.success).map(\.url))
+            let freedItems = selected.filter { succeeded.contains($0.url) }
+            await CleaningHistoryStore.shared.record(
+                module: historyLabel,
+                bytesFreed: freedItems.compactMap(\.sizeBytes).reduce(0, +),
+                itemCount: freedItems.count
+            )
+        }
     }
 }

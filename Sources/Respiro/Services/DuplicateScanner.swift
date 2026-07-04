@@ -18,8 +18,10 @@ final class DuplicateScanner {
     }
 
     private static func collect(minSize: Int64, roots: [URL]) -> [CleanableItem] {
-        let keys: [URLResourceKey] = [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey]
+        let keys: [URLResourceKey] = [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey,
+                                      .fileResourceIdentifierKey]
         var bySize: [Int64: [URL]] = [:]
+        var seenFileIds = Set<NSObject>()
         for root in roots {
             guard let enumerator = FileManager.default.enumerator(
                 at: root, includingPropertiesForKeys: keys,
@@ -33,6 +35,11 @@ final class DuplicateScanner {
                       let size = values.fileSize.map(Int64.init),
                       size >= minSize
                 else { continue }
+                // Hard links point at the same data: not duplicates, and
+                // "removing" one would free nothing.
+                if let fileId = values.fileResourceIdentifier as? NSObject {
+                    guard seenFileIds.insert(fileId).inserted else { continue }
+                }
                 bySize[size, default: []].append(url)
             }
         }

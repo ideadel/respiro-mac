@@ -5,22 +5,40 @@ struct ProcessRunner {
     @discardableResult
     static func run(_ executable: String, _ arguments: [String]) async throws -> (status: Int32, stdout: String, stderr: String) {
         try await withCheckedThrowingContinuation { continuation in
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = arguments
-            let outPipe = Pipe()
-            let errPipe = Pipe()
-            process.standardOutput = outPipe
-            process.standardError = errPipe
-            process.terminationHandler = { finished in
-                let stdout = String(data: outPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-                let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-                continuation.resume(returning: (finished.terminationStatus, stdout, stderr))
-            }
-            do {
-                try process.run()
-            } catch {
-                continuation.resume(throwing: error)
+            DispatchQueue.global(qos: .userInitiated).async {
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: executable)
+                process.arguments = arguments
+                let outPipe = Pipe()
+                let errPipe = Pipe()
+                process.standardOutput = outPipe
+                process.standardError = errPipe
+                do {
+                    try process.run()
+                } catch {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                // Drain both pipes while the child runs: reading only after
+                // termination deadlocks once output exceeds the ~64KB pipe buffer.
+                var stdoutData = Data()
+                var stderrData = Data()
+                let group = DispatchGroup()
+                group.enter()
+                DispatchQueue.global(qos: .userInitiated).async {
+                    stdoutData = outPipe.fileHandleForReading.readDataToEndOfFile()
+                    group.leave()
+                }
+                group.enter()
+                DispatchQueue.global(qos: .userInitiated).async {
+                    stderrData = errPipe.fileHandleForReading.readDataToEndOfFile()
+                    group.leave()
+                }
+                process.waitUntilExit()
+                group.wait()
+                continuation.resume(returning: (process.terminationStatus,
+                                                String(data: stdoutData, encoding: .utf8) ?? "",
+                                                String(data: stderrData, encoding: .utf8) ?? ""))
             }
         }
     }

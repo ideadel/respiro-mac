@@ -9,9 +9,22 @@ final class AppScanner {
         var apps: [InstalledApp] = []
         for root in roots {
             guard let contents = try? FileManager.default.contentsOfDirectory(
-                at: root, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]
+                at: root, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
             ) else { continue }
-            for url in contents where url.pathExtension == "app" {
+            var candidates: [URL] = []
+            for url in contents {
+                if url.pathExtension == "app" {
+                    candidates.append(url)
+                } else if (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
+                    // One extra level: /Applications/Utilities, vendor folders
+                    // like "Adobe Creative Cloud". Never descend into bundles.
+                    let nested = (try? FileManager.default.contentsOfDirectory(
+                        at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]
+                    )) ?? []
+                    candidates += nested.filter { $0.pathExtension == "app" }
+                }
+            }
+            for url in candidates {
                 guard let bundle = Bundle(url: url) else { continue }
                 let bundleId = bundle.bundleIdentifier
                 if DenyList.isBlockedBundleId(bundleId) || DenyList.isBlockedPath(url) { continue }

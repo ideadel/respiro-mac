@@ -36,6 +36,11 @@ final class TrashViewModel: ObservableObject {
         }.value
         message = failures == 0 ? "Cestino svuotato." : "\(failures) elementi non eliminabili (in uso o protetti)."
         isWorking = false
+        let before = sizeBytes ?? 0
+        let countBefore = itemCount
         await refresh()
+        let freed = max(0, before - (sizeBytes ?? 0))
+        await CleaningHistoryStore.shared.record(module: "Cestino", bytesFreed: freed,
+                                                 itemCount: max(0, countBefore - itemCount))
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LeftoverDetailView: View {
     let app: InstalledApp
+    var allApps: [InstalledApp] = []
     var onUninstalled: () -> Void
 
     @StateObject private var viewModel = LeftoverReviewViewModel()
@@ -26,23 +27,34 @@ struct LeftoverDetailView: View {
                 RemovalResultView(results: viewModel.results,
                                   banner: viewModel.errorBanner,
                                   appRemoved: viewModel.appRemoved,
+                                  showLoginItemsNote: viewModel.hadLoginItemHints,
                                   onClose: onUninstalled)
             }
         }
         .navigationTitle(app.displayName)
-        .task { await viewModel.load(app: app) }
+        .task { await viewModel.load(app: app, allApps: allApps) }
         .sheet(isPresented: $viewModel.showConfirmSheet) {
             ConfirmRemovalSheet(
                 appName: app.displayName,
                 itemCount: viewModel.selectedItems.count,
                 totalSize: viewModel.selectedSize,
                 elevatedCount: viewModel.elevatedSelectedCount,
+                receiptCount: viewModel.selectedReceiptCount,
+                appIsRunning: viewModel.appIsRunning,
                 onConfirm: {
                     viewModel.showConfirmSheet = false
                     Task { await viewModel.performRemoval(app: app) }
                 },
                 onCancel: { viewModel.showConfirmSheet = false }
             )
+        }
+        .alert("L'app è ancora in esecuzione", isPresented: $viewModel.showForceQuitAlert) {
+            Button("Forza chiusura e disinstalla", role: .destructive) {
+                Task { await viewModel.performRemoval(app: app, forceQuit: true) }
+            }
+            Button("Annulla", role: .cancel) {}
+        } message: {
+            Text("\(app.displayName) non si è chiusa entro pochi secondi. Vuoi forzarne la chiusura e continuare la disinstallazione?")
         }
     }
 
@@ -140,6 +152,13 @@ struct LeftoverDetailView: View {
                     .padding(.vertical, 2)
                     .background(Palette.warning.opacity(0.16), in: Capsule())
                     .foregroundStyle(Palette.warning)
+            } else if item.matchReason == .helperBundleId {
+                Text(item.matchReason.badge)
+                    .font(.system(size: 10, weight: .semibold))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Palette.accent.opacity(0.16), in: Capsule())
+                    .foregroundStyle(Palette.accent)
             }
             if item.requiresElevation {
                 Image(systemName: "lock.fill")

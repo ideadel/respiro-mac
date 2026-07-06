@@ -2,7 +2,9 @@
 
 Utility macOS per pulizia e manutenzione del sistema — 100% locale, zero rete, zero telemetria.
 
-Distribuito gratuitamente su [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro) (mirror: [sevenweb-portal.vercel.app](https://sevenweb-portal.vercel.app/apps/respiro/)).
+Distribuito su [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro) — **in arrivo** (acquisto una tantum, niente abbonamento). Le build 1.x già scaricate restano utilizzabili (grandfathering).
+
+Modello commerciale: [`docs/MONETIZATION.md`](docs/MONETIZATION.md) · EULA: [`docs/EULA.md`](docs/EULA.md)
 
 Sorgente privato: [github.com/ideadel/respiro-mac](https://github.com/ideadel/respiro-mac)
 
@@ -50,4 +52,4 @@ Verifica pre-release:
 
 ## Licenza
 
-Vedi [LICENSE](LICENSE). Uso gratuito; il sorgente resta privato.
+Vedi [LICENSE](LICENSE) (MIT, codice/sorgente dove applicabile). Il **binario distribuito** è soggetto a [EULA](docs/EULA.md). Il sorgente resta privato.

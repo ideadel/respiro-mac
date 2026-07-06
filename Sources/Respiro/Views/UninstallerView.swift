@@ -30,7 +30,6 @@ struct UninstallerView: View {
             .frame(minWidth: 400, maxWidth: .infinity)
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Trasloco")
         .task {
             await appList.scan()
             catalogReady = true

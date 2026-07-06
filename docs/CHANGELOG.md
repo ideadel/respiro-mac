@@ -1,5 +1,15 @@
 # Changelog Respiro
 
+## 1.1.4 (2026-07-06)
+
+### UI
+- Fascia contestuale unificata in cima all'area principale: icona, titolo e guida per ogni sezione
+- Sidebar stabile sotto i traffic lights — niente salti verticali al cambio voce
+- Finestra immersiva senza barra superiore; «Apri Respiro» dalla menu bar riporta in primo piano senza duplicati
+- Chip bar e sotto-tab coerenti (Zavorra, Diario)
+
+---
+
 ## 1.1.3 (2026-07-04)
 
 ### UI

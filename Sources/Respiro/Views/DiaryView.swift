@@ -7,21 +7,13 @@ struct DiaryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: $tab) {
-                Text("Statistiche").tag(0)
-                Text("Scia").tag(1)
-                Text("Registro").tag(2)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 340)
-            .padding(.top, 12)
+            SubModuleChipBar(titles: ["Statistiche", "Scia", "Registro"], selection: $tab)
             switch tab {
             case 0: StatsView()
             case 1: SciaView()
             default: ActionLogView()
             }
         }
-        .navigationTitle("Diario")
     }
 }
 
@@ -76,14 +68,6 @@ struct ActionLogView: View {
 
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Registro")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Palette.textPrimary)
-                Text("Tutto quello che Respiro ha toccato, file per file. Niente è segreto.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Palette.textSecondary)
-            }
             Spacer()
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 8) {

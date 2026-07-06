@@ -74,14 +74,6 @@ struct SciaView: View {
 
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Scia")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Palette.textPrimary)
-                Text("La traccia di ciò che Respiro ha toccato — nel Cestino, recuperabile.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Palette.textSecondary)
-            }
             Spacer()
             VStack(alignment: .trailing, spacing: 8) {
                 Picker("Periodo", selection: $period) {

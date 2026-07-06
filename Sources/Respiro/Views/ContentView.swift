@@ -22,31 +22,82 @@ struct ContentView: View {
     @StateObject private var startupVM = StartupViewModel()
     @StateObject private var maintenanceVM = MaintenanceViewModel()
     @StateObject private var spaceLensVM = SpaceLensViewModel()
+    @State private var isLicensed = LicenseService.isLicensed
 
     var body: some View {
-        ZStack {
-            AuroraBackground(subdued: route.area != .respira)
-            HStack(spacing: 0) {
-                sidebar
-                    .frame(width: 210)
-                Divider()
-                    .overlay(Palette.border)
-                areaView
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ZStack(alignment: .topLeading) {
+            RespiroMainShell(
+                junk: junkVM,
+                largeFiles: largeFilesVM,
+                duplicates: duplicatesVM,
+                protection: protectionVM,
+                trash: trashVM,
+                startup: startupVM,
+                maintenance: maintenanceVM,
+                spaceLens: spaceLensVM
+            )
+            .environmentObject(route)
+            if LicenseService.requiresLicense && !isLicensed {
+                LicenseActivationView { isLicensed = true }
             }
         }
-        .frame(minWidth: 900, minHeight: 560)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .respiroWindow()
-        .environmentObject(route)
+    }
+}
+
+/// Shell layout — fixed chrome band on top, sidebar and content below.
+private struct RespiroMainShell: View {
+    @EnvironmentObject private var route: AppRoute
+    @State private var revealed = false
+
+    @ObservedObject var junk: CleanupListViewModel
+    @ObservedObject var largeFiles: CleanupListViewModel
+    @ObservedObject var duplicates: CleanupListViewModel
+    @ObservedObject var protection: CleanupListViewModel
+    @ObservedObject var trash: TrashViewModel
+    @ObservedObject var startup: StartupViewModel
+    @ObservedObject var maintenance: MaintenanceViewModel
+    @ObservedObject var spaceLens: SpaceLensViewModel
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            // Aurora fills the whole window (behind the traffic lights).
+            AuroraBackground(subdued: route.area != .respira)
+
+            // Navigation chrome uses a fixed top inset and ignores the safe
+            // area entirely: the safe area resolves 0 -> 32 over several frames
+            // at launch, and reacting to it is exactly what made the sidebar
+            // bounce. A constant inset over a size-bounded layout is stable
+            // from the first frame.
+            VStack(spacing: 0) {
+                Color.clear
+                    .frame(height: Metrics.chromeTopInset)
+                    .accessibilityHidden(true)
+                HStack(alignment: .top, spacing: 0) {
+                    sidebar
+                        .frame(width: 236)
+                    Divider()
+                        .overlay(Palette.border)
+                    areaView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        .clipped()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .ignoresSafeArea()
+            // Reveal the chrome only after the first layout pass settles, so
+            // the brief startup relayout is never visible.
+            .opacity(revealed ? 1 : 0)
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.18)) { revealed = true }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Respiro")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(Palette.accent.opacity(0.9))
-                .padding(.horizontal, 14)
-                .padding(.bottom, 2)
+        VStack(alignment: .leading, spacing: 0) {
             ForEach(Area.allCases) { area in
                 Button {
                     route.selectArea(area)
@@ -57,20 +108,29 @@ struct ContentView: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.top, Metrics.titleBarSafeArea)
+        .padding(.horizontal, 8)
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(Palette.sidebarGlass.background(.ultraThinMaterial))
     }
 
     @ViewBuilder
     private var areaView: some View {
+        let multiModule = route.area.modules.count > 1
         VStack(spacing: 0) {
-            if route.area.modules.count > 1 {
+            if multiModule {
                 ModuleChipBar(modules: route.area.modules, selection: $route.module)
                     .padding(.horizontal, Metrics.windowPadding)
-                    .padding(.top, Metrics.titleBarSafeArea)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: Metrics.chipBarBandHeight)
             }
+
+            if route.module != .respira {
+                ModuleContextBand(module: route.module, compact: multiModule)
+                    .frame(height: multiModule ? Metrics.moduleContextCompactHeight : Metrics.moduleContextHeroHeight)
+            }
+
             moduleView
+                .moduleTitleHidden(true)
         }
     }
 
@@ -78,8 +138,8 @@ struct ContentView: View {
     private var moduleView: some View {
         switch route.module {
         case .respira:
-            RespiraHomeView(junk: junkVM, trash: trashVM, protection: protectionVM,
-                            startup: startupVM)
+            RespiraHomeView(junk: junk, trash: trash, protection: protection,
+                            startup: startup)
         case .aria:
             CleanupModuleView(
                 title: "Aria",
@@ -87,19 +147,19 @@ struct ContentView: View {
                 actionLabel: "Libera",
                 emptyMessage: "Niente aria viziata: le cache sono già leggere.",
                 reassurance: "Sono file rigenerabili: al massimo il primo avvio delle app sarà un filo più lento.",
-                viewModel: junkVM)
+                viewModel: junk)
         case .cestino:
-            TrashView(viewModel: trashVM)
+            TrashView(viewModel: trash)
         case .zavorra:
-            ZavorraView(largeFiles: largeFilesVM, duplicates: duplicatesVM)
+            ZavorraView(largeFiles: largeFiles, duplicates: duplicates)
         case .panorama:
-            SpaceLensView(viewModel: spaceLensVM)
+            SpaceLensView(viewModel: spaceLens)
         case .trasloco:
             UninstallerView()
         case .avvio:
-            StartupView(viewModel: startupVM)
+            StartupView(viewModel: startup)
         case .tagliando:
-            MaintenanceView(viewModel: maintenanceVM)
+            MaintenanceView(viewModel: maintenance)
         case .guardia:
             CleanupModuleView(
                 title: "Guardia",
@@ -107,7 +167,7 @@ struct ContentView: View {
                 actionLabel: "Rimuovi selezionati",
                 emptyMessage: "Nessuna anomalia trovata. Il tuo Mac è in ordine.",
                 reassurance: "Nessun allarme: ti segnalo solo cose insolite da controllare.",
-                viewModel: protectionVM)
+                viewModel: protection)
         case .diario:
             DiaryView()
         }
@@ -162,32 +222,37 @@ struct ZavorraView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: $tab) {
-                Text("Ingombranti").tag(0)
-                Text("Doppioni").tag(1)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 260)
-            .padding(.top, 12)
+            SubModuleChipBar(titles: ["Ingombranti", "Doppioni"], selection: $tab)
             if tab == 0 {
+                Text("File oltre 100 MB nelle cartelle utente. Nessuno è preselezionato.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Metrics.windowPadding)
+                    .padding(.bottom, 6)
                 CleanupModuleView(
                     title: "Ingombranti",
-                    subtitle: "File oltre 100 MB nelle cartelle utente. Nessuno è preselezionato: scegli tu cosa spostare nel Cestino.",
+                    subtitle: "",
                     actionLabel: "Sposta nel Cestino",
                     emptyMessage: "Nessun file oltre 100 MB nelle cartelle utente.",
                     reassurance: "Do solo un'occhiata: non tocco niente finché non scegli tu.",
                     viewModel: largeFiles)
             } else {
+                Text("File identici (SHA-256) in Download, Documenti e Scrivania.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Metrics.windowPadding)
+                    .padding(.bottom, 6)
                 CleanupModuleView(
                     title: "Doppioni",
-                    subtitle: "File identici (verificati con hash SHA-256) in Download, Documenti e Scrivania. In ogni gruppo una copia resta protetta.",
+                    subtitle: "",
                     actionLabel: "Rimuovi doppioni",
                     emptyMessage: "Nessun doppione trovato.",
                     reassurance: "Per ogni gruppo tengo una copia al sicuro.",
                     viewModel: duplicates)
             }
         }
-        .navigationTitle("Zavorra")
     }
 }
 
@@ -196,26 +261,27 @@ struct SidebarRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             Image(systemName: isSelected ? area.selectedIcon : area.icon)
+                .font(.system(size: 17, weight: .medium))
                 .foregroundStyle(isSelected ? Palette.accent : Palette.textSecondary)
-                .frame(width: 20)
-            VStack(alignment: .leading, spacing: 1) {
+                .frame(width: 26, height: 26)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(area.title)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(isSelected ? Palette.accent : Palette.textPrimary)
                 Text(area.subtitle)
-                    .font(.system(size: 10))
+                    .font(.system(size: 11))
                     .foregroundStyle(Palette.textSecondary)
             }
+            Spacer(minLength: 0)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, minHeight: Metrics.sidebarRowHeight, maxHeight: Metrics.sidebarRowHeight, alignment: .leading)
         .contentShape(Rectangle())
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? Palette.accentTint : .clear)
+                .fill(isSelected ? Palette.accentTint : Color.clear)
         )
     }
 }

@@ -36,21 +36,11 @@ struct StartupView: View {
             }
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Avvio")
         .task { await viewModel.refreshIfNeeded() }
     }
 
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Avvio")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Palette.textPrimary)
-                Text("LaunchAgents e LaunchDaemons di terze parti. Disattivali o rimuovili (nel Cestino).")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Palette.textSecondary)
-                    .frame(maxWidth: 520, alignment: .leading)
-            }
             Spacer()
             Button {
                 Task { await viewModel.refresh() }

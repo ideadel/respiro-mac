@@ -27,7 +27,6 @@ struct RespiraHomeView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Spacer(minLength: 12)
             MelaMascot(size: 132, state: isScanning ? .scanning : (status.level == .bene && hasScanned ? .happy : .idle))
 
             VStack(spacing: 8) {
@@ -68,7 +67,6 @@ struct RespiraHomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(Metrics.windowPadding)
-        .navigationTitle("Respira")
         .task {
             history = await CleaningHistoryStore.shared.history()
         }

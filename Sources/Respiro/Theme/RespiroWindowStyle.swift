@@ -12,50 +12,72 @@ enum RespiroWindowColors {
     }
 }
 
-/// Applies native transparent title bar + full-bleed content to the host window.
+/// Chromeless window: only traffic lights over full-bleed content.
+enum RespiroWindowChrome {
+    static func apply(to window: NSWindow) {
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.styleMask.insert(.fullSizeContentView)
+        window.isOpaque = false
+        window.backgroundColor = RespiroWindowColors.background
+        window.isMovableByWindowBackground = true
+        window.contentMinSize = NSSize(width: 900, height: 560)
+        if #available(macOS 11.0, *) {
+            window.titlebarSeparatorStyle = .none
+        }
+        if window.toolbar != nil {
+            window.toolbar = nil
+        }
+    }
+}
+
+private final class ChromeApplyingView: NSView {
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        RespiroWindowChrome.apply(to: window)
+        DispatchQueue.main.async { [weak window] in
+            guard let window else { return }
+            RespiroWindowChrome.apply(to: window)
+        }
+    }
+}
+
 private struct WindowConfigurator: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
-        let view = NSView(frame: .zero)
-        context.coordinator.scheduleConfigure(for: view)
+        let view = ChromeApplyingView(frame: .zero)
+        context.coordinator.startObserving(view)
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        context.coordinator.scheduleConfigure(for: nsView)
+        if let window = nsView.window {
+            RespiroWindowChrome.apply(to: window)
+        }
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    final class Coordinator {
-        private var configuredWindows = Set<ObjectIdentifier>()
+    final class Coordinator: NSObject {
+        private weak var view: NSView?
 
-        func scheduleConfigure(for view: NSView) {
-            attemptConfigure(for: view, retries: 8)
+        func startObserving(_ view: NSView) {
+            self.view = view
+            let center = NotificationCenter.default
+            center.addObserver(self, selector: #selector(windowChanged(_:)),
+                               name: NSWindow.didBecomeKeyNotification, object: nil)
+            center.addObserver(self, selector: #selector(windowChanged(_:)),
+                               name: NSWindow.didBecomeMainNotification, object: nil)
         }
 
-        private func attemptConfigure(for view: NSView, retries: Int) {
-            DispatchQueue.main.async { [weak self, weak view] in
-                guard let self, let view else { return }
-                if let window = view.window {
-                    self.apply(to: window)
-                    return
-                }
-                guard retries > 0 else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    self.attemptConfigure(for: view, retries: retries - 1)
-                }
-            }
+        @objc private func windowChanged(_ notification: Notification) {
+            guard let window = notification.object as? NSWindow,
+                  window === view?.window else { return }
+            RespiroWindowChrome.apply(to: window)
         }
 
-        private func apply(to window: NSWindow) {
-            let id = ObjectIdentifier(window)
-            guard !configuredWindows.contains(id) else { return }
-            window.titlebarAppearsTransparent = true
-            window.titleVisibility = .hidden
-            window.styleMask.insert(.fullSizeContentView)
-            window.isOpaque = false
-            window.backgroundColor = RespiroWindowColors.background
-            configuredWindows.insert(id)
+        deinit {
+            NotificationCenter.default.removeObserver(self)
         }
     }
 }
@@ -68,16 +90,10 @@ private struct RespiroWindowModifier: ViewModifier {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .allowsHitTesting(false)
             }
-            .overlay {
-                Rectangle()
-                    .strokeBorder(Palette.border, lineWidth: 1)
-                    .allowsHitTesting(false)
-            }
     }
 }
 
 extension View {
-    /// Native macOS traffic lights over full-bleed content — no custom chrome.
     func respiroWindow() -> some View {
         modifier(RespiroWindowModifier())
     }

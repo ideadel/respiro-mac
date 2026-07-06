@@ -32,7 +32,6 @@ struct TrashView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(Metrics.windowPadding)
-        .navigationTitle("Cestino")
         .task { await viewModel.refresh() }
         .confirmationDialog(
             "Eliminare definitivamente \(viewModel.itemCount) elementi? L'operazione non è recuperabile.",

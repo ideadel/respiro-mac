@@ -50,7 +50,14 @@ if [[ -f "$ICON_ICNS" ]]; then
 fi
 
 # Ad-hoc signature, no entitlements (deliberately NOT sandboxed).
-codesign --force -s - "$APP"
+# Per distribuzione a pagamento: DEVELOPER_ID="Developer ID Application: …" ./build-app.sh
+if [[ -n "$DEVELOPER_ID" ]]; then
+  codesign --force --options runtime -s "$DEVELOPER_ID" "$APP"
+  echo "✅ Firmata con Developer ID: $DEVELOPER_ID"
+  echo "   Notarizza con: DEVELOPER_ID=\"$DEVELOPER_ID\" NOTARY_PROFILE=respiro ./scripts/notarize.sh"
+else
+  codesign --force -s - "$APP"
+fi
 
 echo "✅ Build completata: $PWD/$APP"
 echo "   Apri con: open $APP"

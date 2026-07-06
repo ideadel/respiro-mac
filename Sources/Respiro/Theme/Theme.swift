@@ -59,9 +59,18 @@ enum Metrics {
     static let cardRadius: CGFloat = 12
     static let buttonRadius: CGFloat = 7
     static let rowHeight: CGFloat = 44
+    static let sidebarRowHeight: CGFloat = 56
     static let sidebarMin: CGFloat = 180
-    /// Space below traffic lights when using transparent title bar.
-    static let titleBarSafeArea: CGFloat = 28
+    /// Fixed band below traffic lights — constant, never changes on navigation.
+    static let chromeTopInset: CGFloat = 44
+    /// Fixed height of the chip-bar band so every area shares the same layout.
+    static let chipBarBandHeight: CGFloat = 44
+    /// Context band below chips (multi-module areas).
+    static let moduleContextCompactHeight: CGFloat = 56
+    /// Context band when the area has a single module (no chip bar).
+    static let moduleContextHeroHeight: CGFloat = 76
+    /// Secondary tab row inside a module (Zavorra, Diario).
+    static let subTabBandHeight: CGFloat = 40
 }
 
 // MARK: - Reusable style pieces
@@ -82,6 +91,22 @@ struct GlassCard: ViewModifier {
 extension View {
     func glassCard(radius: CGFloat = Metrics.cardRadius) -> some View {
         modifier(GlassCard(radius: radius))
+    }
+
+    /// When true, module views hide their H1 — the chip bar already names the module.
+    func moduleTitleHidden(_ hidden: Bool) -> some View {
+        environment(\.moduleTitleHidden, hidden)
+    }
+}
+
+private struct ModuleTitleHiddenKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var moduleTitleHidden: Bool {
+        get { self[ModuleTitleHiddenKey.self] }
+        set { self[ModuleTitleHiddenKey.self] = newValue }
     }
 }
 

@@ -8,13 +8,16 @@ struct RespiroApp: App {
     }
 
     var body: some Scene {
-        WindowGroup(id: "main") {
+        // Single-window scene: "Apri Respiro" re-focuses the existing window
+        // instead of spawning a duplicate.
+        Window("Respiro", id: "main") {
             ContentView()
                 .task {
                     await CleaningHistoryStore.shared.snapshotFreeSpaceIfNeeded()
                     BackgroundScanScheduler.shared.start()
                 }
         }
+        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(after: .appInfo) {
                 if UpdaterService.shared.isActive {
@@ -72,8 +75,15 @@ struct MenuBarView: View {
             Text(String(format: "CPU: %.0f%% carico medio", cpu))
         }
         Button("Apri Respiro") {
-            openWindow(id: "main")
+            // Bring the existing window forward; only create it if missing.
             NSApp.activate(ignoringOtherApps: true)
+            if let window = NSApp.windows.first(where: {
+                $0.identifier?.rawValue.hasPrefix("main") == true
+            }) {
+                window.makeKeyAndOrderFront(nil)
+            } else {
+                openWindow(id: "main")
+            }
         }
         .task {
             refresh()

@@ -40,6 +40,22 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    /// Friendly one-liner for the context band at the top of each section.
+    var guidance: String {
+        switch self {
+        case .respira: return "Come sta il tuo Mac, in una schermata."
+        case .aria: return "Cache, log e file che le app ricreano da sole. Tutto nel Cestino, recuperabile."
+        case .cestino: return "Quanto pesa il Cestino e quando vuoi svuotarlo."
+        case .zavorra: return "File ingombranti e doppioni: tu scegli cosa spostare."
+        case .panorama: return "Dove finiscono i gigabyte, cartella per cartella."
+        case .trasloco: return "Disinstalla un'app e rivedi cosa lascia indietro."
+        case .avvio: return "Cosa parte insieme al Mac — disattiva o rimuovi dal Cestino."
+        case .tagliando: return "Piccole manutenzioni periodiche, quando ti va."
+        case .guardia: return "Elementi insoliti da controllare — niente allarmi."
+        case .diario: return "Quanto hai liberato, la traccia delle azioni e il registro."
+        }
+    }
+
     var icon: String {
         switch self {
         case .respira: return "lungs"

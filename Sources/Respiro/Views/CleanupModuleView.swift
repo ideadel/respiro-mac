@@ -23,7 +23,6 @@ struct CleanupModuleView: View {
                 doneView
             }
         }
-        .navigationTitle(title)
         .task { await viewModel.scanIfNeeded() }
         .confirmationDialog(
             "Spostare nel Cestino \(viewModel.selectedItems.count) elementi (\(formatBytes(viewModel.selectedSize)))?",
@@ -86,11 +85,6 @@ struct CleanupModuleView: View {
 
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.system(size: 20, weight: .bold)).foregroundStyle(Palette.textPrimary)
-                Text(subtitle).font(.system(size: 11)).foregroundStyle(Palette.textSecondary)
-                    .frame(maxWidth: 520, alignment: .leading)
-            }
             Spacer()
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 8) {

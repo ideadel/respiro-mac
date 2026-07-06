@@ -19,20 +19,12 @@ struct SpaceLensView: View {
             }
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Panorama")
         .onAppear { viewModel.loadIfNeeded() }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Panorama").font(.system(size: 20, weight: .bold)).foregroundStyle(Palette.textPrimary)
-                    if let stats = DiskUsageService.volumeStats() {
-                        Text("Volume di avvio · \(formatBytes(stats.total - stats.free)) usati · \(formatBytes(stats.free)) liberi")
-                            .font(.system(size: 11)).foregroundStyle(Palette.textSecondary)
-                    }
-                }
                 Spacer()
                 Button {
                     viewModel.load()
@@ -42,6 +34,9 @@ struct SpaceLensView: View {
                 .buttonStyle(.plain).foregroundStyle(Palette.accent)
             }
             if let stats = DiskUsageService.volumeStats() {
+                Text("Volume di avvio · \(formatBytes(stats.total - stats.free)) usati · \(formatBytes(stats.free)) liberi")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
                 let used = Double(stats.total - stats.free)
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {

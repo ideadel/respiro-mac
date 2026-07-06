@@ -21,11 +21,10 @@ contro questa lista.
    misurato ora — mai "fino a", mai stime, mai doppi conteggi.
 6. **Mai finte attese.** Se una scansione dura 0,3 secondi, dura 0,3 secondi.
    Niente progress bar teatrali.
-7. **Mai dark pattern su Ko-fi.** Il sostegno compare in esattamente due
-   punti discreti: la finestra Informazioni e una riga gentile (non modale,
-   massimo una volta al mese) dopo una pulizia importante:
-   *"Respiro è gratuito e lo resterà. Se ti è utile, un caffè fa piacere ☕"*.
-   Mai bloccare, mai interrompere, mai condizionare funzioni.
+7. **Mai dark pattern su Ko-fi o acquisto.** Il sostegno opzionale (Ko-fi) o l'acquisto licenza
+   devono restare discreti: Informazioni, pagina prodotto, nessun countdown o blocco aggressivo.
+   Dopo una pulizia importante, al massimo una riga gentile al mese — mai condizionare funzioni
+   con donazioni.
 
 ## Sempre
 

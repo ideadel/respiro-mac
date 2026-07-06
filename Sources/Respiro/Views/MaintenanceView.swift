@@ -5,24 +5,9 @@ struct MaintenanceView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            header
             taskList
         }
         .padding(Metrics.windowPadding)
-        .navigationTitle("Tagliando")
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Tagliando")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(Palette.textPrimary)
-            Text("Attività di manutenzione del sistema. Quelle con il lucchetto richiedono la password di amministratore.")
-                .font(.system(size: 11))
-                .foregroundStyle(Palette.textSecondary)
-                .frame(maxWidth: 520, alignment: .leading)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var taskList: some View {

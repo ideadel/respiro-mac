@@ -33,7 +33,7 @@ struct ConfirmRemovalSheet: View {
                         .foregroundStyle(Palette.textSecondary)
                 }
                 if appIsRunning {
-                    Label("Respiro chiuderà l'app prima di rimuoverla.",
+                    Label("\(appName) è in esecuzione e verrà chiusa prima della rimozione.",
                           systemImage: "power")
                         .font(.system(size: 13))
                         .foregroundStyle(Palette.textSecondary)

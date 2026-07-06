@@ -1,6 +1,6 @@
 # Documentazione Respiro
 
-Indice per sviluppatori e agenti AI che lavorano su **Respiro** (`cleanmyMela`).
+Indice per sviluppatori e agenti AI che lavorano su **Respiro** (cartella `respiro`, repo `respiro-mac`).
 
 ## Knowledge graph (graphify)
 

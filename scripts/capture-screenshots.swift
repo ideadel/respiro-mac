@@ -43,7 +43,7 @@ func capture(name: String, outDir: URL) throws {
 
 let out = URL(fileURLWithPath: CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "sevenweb-portal/public/assets/screenshots")
+    : "../sevenweb-portal/public/assets/screenshots")
 let appPath = CommandLine.arguments.count > 2
     ? CommandLine.arguments[2]
     : "build/Respiro.app"

@@ -3,7 +3,6 @@ build/
 dist/
 .DS_Store
 .cursor/
-sevenweb-portal/
 
 # Graphify (indice del codice per Claude Code / Cursor)
 graphify-out/

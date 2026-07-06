@@ -19,4 +19,10 @@ echo "▸ --selftest-denylist"
 echo "▸ --selftest-cleanup"
 "$BIN" --selftest-cleanup
 
+echo "▸ --selftest-appscanner"
+"$BIN" --selftest-appscanner
+
+echo "▸ --selftest-systemextension"
+"$BIN" --selftest-systemextension
+
 echo "✅ verify OK"

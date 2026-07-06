@@ -64,6 +64,14 @@ struct RemovalResultView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            if results.contains(where: { !$0.success && ($0.errorDescription?.lowercased().contains("estensione") == true
+                || $0.errorDescription?.lowercased().contains("riavvia") == true) }) {
+                Text("Se un'estensione resta registrata, un riavvio del Mac di solito completa la rimozione.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             HStack {
                 Button("Mostra nel Cestino") {
                     NSWorkspace.shared.open(URL(fileURLWithPath: NSHomeDirectory() + "/.Trash"))

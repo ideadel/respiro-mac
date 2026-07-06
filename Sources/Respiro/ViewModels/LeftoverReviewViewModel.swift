@@ -64,6 +64,10 @@ final class LeftoverReviewViewModel: ObservableObject {
 
     func performRemoval(app: InstalledApp, forceQuit: Bool = false) async {
         errorBanner = nil
+        if DenyList.isRunningApp(bundleURL: app.bundleURL, bundleIdentifier: app.bundleIdentifier) {
+            errorBanner = "Non puoi disinstallare Respiro mentre la stai usando."
+            return
+        }
         // 1. The app (and its helpers) must not be running: processes would
         //    recreate files and survive the bundle's move to the Trash.
         let ids = processIds(for: app)
@@ -97,17 +101,38 @@ final class LeftoverReviewViewModel: ObservableObject {
         let packageIds: [String] = receipts.compactMap {
             if case .packageReceipt(let id) = $0.kind { return id } else { return nil }
         }
-        if !elevated.isEmpty || !packageIds.isEmpty || !systemLabels.isEmpty {
+        let extensionBundleIds = SystemExtensionService.bundleIds(from: items, auxiliaryIds: auxiliaryIds)
+        let systemExtensions = await SystemExtensionService.registrations(forBundleIds: extensionBundleIds)
+        if !elevated.isEmpty || !packageIds.isEmpty || !systemLabels.isEmpty || !systemExtensions.isEmpty {
             do {
                 let outcome = try await privilegedService.removeElevated(
                     paths: elevated.map(\.url),
                     bootoutLabels: systemLabels,
-                    forgetPackageIds: packageIds
+                    forgetPackageIds: packageIds,
+                    uninstallSystemExtensions: systemExtensions
                 )
+                var retriedPaths = Set<String>()
+                for item in elevated where SystemExtensionService.isExtensionArtifact(item.url) {
+                    guard !outcome.removedPaths.contains(item.url.path),
+                          FileManager.default.fileExists(atPath: item.url.path),
+                          let bundleId = SystemExtensionService.bundleId(fromExtensionArtifact: item.url),
+                          outcome.uninstalledExtensionBundleIds.contains(bundleId),
+                          DenyList.validateForRemoval(item.url) else { continue }
+                    try? FileManager.default.trashItem(at: item.url, resultingItemURL: nil)
+                    if !FileManager.default.fileExists(atPath: item.url.path) {
+                        retriedPaths.insert(item.url.path)
+                    }
+                }
                 allResults += elevated.map {
                     let removed = outcome.removedPaths.contains($0.url.path)
-                    return RemovalResult(url: $0.url, category: $0.category, success: removed,
-                                         errorDescription: removed ? nil : "Il file non è stato rimosso")
+                        || retriedPaths.contains($0.url.path)
+                    let extensionUnregistered = SystemExtensionService.bundleId(fromExtensionArtifact: $0.url)
+                        .map { outcome.uninstalledExtensionBundleIds.contains($0) } ?? false
+                    let success = removed || (extensionUnregistered && !FileManager.default.fileExists(atPath: $0.url.path))
+                    return RemovalResult(url: $0.url, category: $0.category, success: success,
+                                         errorDescription: success ? nil
+                                         : RemovalErrorMessage.humanizeElevatedFailure(for: $0.url,
+                                                                                       extensionUninstallAttempted: !systemExtensions.isEmpty))
                 }
                 allResults += receipts.map { item in
                     let id: String
@@ -141,9 +166,23 @@ final class LeftoverReviewViewModel: ObservableObject {
             allResults.append(RemovalResult(url: app.bundleURL, category: nil,
                                             success: true, errorDescription: nil))
         } catch {
-            allResults.append(RemovalResult(url: app.bundleURL, category: nil,
-                                            success: false,
-                                            errorDescription: error.localizedDescription))
+            // /Applications apps sometimes need elevation even after quit.
+            do {
+                let outcome = try await privilegedService.removeElevated(paths: [app.bundleURL])
+                if outcome.removedPaths.contains(app.bundleURL.path) {
+                    appRemoved = true
+                    allResults.append(RemovalResult(url: app.bundleURL, category: nil,
+                                                    success: true, errorDescription: nil))
+                } else {
+                    allResults.append(RemovalResult(url: app.bundleURL, category: nil,
+                                                    success: false,
+                                                    errorDescription: RemovalErrorMessage.humanizeAppBundleFailure()))
+                }
+            } catch {
+                allResults.append(RemovalResult(url: app.bundleURL, category: nil,
+                                                success: false,
+                                                errorDescription: RemovalErrorMessage.humanizeAppBundleFailure()))
+            }
         }
 
         results = allResults

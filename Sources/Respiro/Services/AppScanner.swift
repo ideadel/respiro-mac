@@ -28,7 +28,7 @@ final class AppScanner {
                 guard let bundle = Bundle(url: url) else { continue }
                 let bundleId = bundle.bundleIdentifier
                 if DenyList.isBlockedBundleId(bundleId) || DenyList.isBlockedPath(url) { continue }
-                if bundleId != nil, bundleId == Bundle.main.bundleIdentifier { continue }
+                if DenyList.isRunningApp(bundleURL: url, bundleIdentifier: bundleId) { continue }
                 let name = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)
                     ?? (bundle.object(forInfoDictionaryKey: "CFBundleName") as? String)
                     ?? url.deletingPathExtension().lastPathComponent

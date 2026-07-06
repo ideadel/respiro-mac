@@ -46,5 +46,5 @@ Checklist manuale (~15 min) da eseguire prima di ogni release. Automazione: `./s
 ## Release
 
 - [ ] `./release.sh` → zip + SHA256
-- [ ] Aggiornare `sevenweb-portal/public/data/respiro.json` (versione + changelog)
+- [ ] Aggiornare `../sevenweb-portal/public/data/respiro.json` (versione + changelog)
 - [ ] `graphify update Sources/Respiro` se codice Swift cambiato

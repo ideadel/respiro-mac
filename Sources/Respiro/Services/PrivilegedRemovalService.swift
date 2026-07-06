@@ -24,6 +24,8 @@ struct ElevatedRemovalOutcome {
     let removedPaths: Set<String>
     /// Package ids no longer listed by `pkgutil --pkgs`.
     let forgottenPackageIds: Set<String>
+    /// System Extension bundle ids no longer active after `systemextensionsctl uninstall`.
+    let uninstalledExtensionBundleIds: Set<String>
 }
 
 /// Removes root-owned files via osascript "with administrator privileges"
@@ -35,9 +37,12 @@ struct PrivilegedRemovalService {
     @discardableResult
     func removeElevated(paths: [URL],
                         bootoutLabels: [String] = [],
-                        forgetPackageIds: [String] = []) async throws -> ElevatedRemovalOutcome {
-        guard !paths.isEmpty || !bootoutLabels.isEmpty || !forgetPackageIds.isEmpty else {
-            return ElevatedRemovalOutcome(removedPaths: [], forgottenPackageIds: [])
+                        forgetPackageIds: [String] = [],
+                        uninstallSystemExtensions: [SystemExtensionRegistration] = []) async throws -> ElevatedRemovalOutcome {
+        guard !paths.isEmpty || !bootoutLabels.isEmpty || !forgetPackageIds.isEmpty
+                || !uninstallSystemExtensions.isEmpty else {
+            return ElevatedRemovalOutcome(removedPaths: [], forgottenPackageIds: [],
+                                          uninstalledExtensionBundleIds: [])
         }
         // Defense-in-depth: re-validate every path right before building the command.
         for url in paths {
@@ -51,6 +56,15 @@ struct PrivilegedRemovalService {
         let user = NSUserName()
         let stamp = Int(Date().timeIntervalSince1970)
         var parts: [String] = []
+        for ext in uninstallSystemExtensions {
+            // Extensions are user-approved; run uninstall as the console user even
+            // though the surrounding script is elevated.
+            parts.append("sudo -u \(shellQuote(user)) /usr/bin/systemextensionsctl uninstall \(shellQuote(ext.teamID)) \(shellQuote(ext.bundleID)) >/dev/null 2>&1 || true")
+        }
+        if !uninstallSystemExtensions.isEmpty {
+            parts.append("sleep 2")
+            parts.append("sudo -u \(shellQuote(user)) /usr/bin/systemextensionsctl gc >/dev/null 2>&1 || true")
+        }
         if !paths.isEmpty {
             parts.append("mkdir -p \(shellQuote(trashDir))")
         }
@@ -78,7 +92,13 @@ struct PrivilegedRemovalService {
                 ?? []
             forgotten = Set(forgetPackageIds.filter { !remaining.contains($0) })
         }
-        return ElevatedRemovalOutcome(removedPaths: removed, forgottenPackageIds: forgotten)
+        let postExtensions = await SystemExtensionService.listRegistrations()
+        let uninstalledExtensions = Set(uninstallSystemExtensions.compactMap { ext in
+            SystemExtensionService.isExtensionInactive(bundleID: ext.bundleID, among: postExtensions)
+                ? ext.bundleID : nil
+        })
+        return ElevatedRemovalOutcome(removedPaths: removed, forgottenPackageIds: forgotten,
+                                      uninstalledExtensionBundleIds: uninstalledExtensions)
     }
 
     private func shellQuote(_ s: String) -> String {

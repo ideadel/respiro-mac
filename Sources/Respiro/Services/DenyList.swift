@@ -11,6 +11,20 @@ enum DenyList {
         return blockedBundleIdPrefixes.contains { id.hasPrefix($0) }
     }
 
+    /// L'app in esecuzione non può comparire in Trasloco né essere rimossa.
+    static func isRunningApp(bundleURL: URL, bundleIdentifier: String?) -> Bool {
+        let candidate = bundleURL.resolvingSymlinksInPath().standardizedFileURL
+        let running = Bundle.main.bundleURL.resolvingSymlinksInPath().standardizedFileURL
+        if candidate.path == running.path { return true }
+        if let mainId = Bundle.main.bundleIdentifier,
+           let id = bundleIdentifier,
+           !mainId.isEmpty,
+           mainId.caseInsensitiveCompare(id) == .orderedSame {
+            return true
+        }
+        return false
+    }
+
     /// Checked against the symlink-resolved path to prevent symlink-escape bypass.
     static func isBlockedPath(_ url: URL) -> Bool {
         let resolved = url.resolvingSymlinksInPath().path

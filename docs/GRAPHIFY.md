@@ -16,7 +16,7 @@
 ## Comandi essenziali
 
 ```sh
-# Dalla root del repo cleanmyMela
+# Dalla root del repo respiro
 
 # Aggiornare dopo modifiche Swift (zero costo API)
 graphify update Sources/Respiro
@@ -38,7 +38,7 @@ graphify tree --graph graphify-out/graph.json --output docs/GRAPH_TREE.html --la
 
 ```sh
 pipx install graphifyy   # o: pip install graphifyy
-cd /path/to/cleanmyMela
+cd /path/to/respiro
 graphify update Sources/Respiro
 graphify cluster-only Sources/Respiro --no-label --graph graphify-out/graph.json
 graphify cursor install  # scrive .cursor/rules/graphify.mdc

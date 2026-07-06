@@ -83,5 +83,5 @@ Per compatibilità esterna (non nell'app):
 2. Crea o riusa View + ViewModel
 3. Aggiungi branch in `ContentView.moduleView`
 4. Se fa pulizia: scanner → `CleanableItem`, hook `ActionLogStore`, spiegazione in `Explanations`
-5. Aggiorna `sevenweb-portal/public/data/respiro.json` (repo portale)
+5. Aggiorna `../sevenweb-portal/public/data/respiro.json` (repo portale)
 6. `graphify update Sources/Respiro`

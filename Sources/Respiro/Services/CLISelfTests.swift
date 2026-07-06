@@ -39,8 +39,20 @@ enum DenyListSelfTest {
                    "validateForRemoval: symlink sotto Download consentito")
         }
 
+        let runningURL = Bundle.main.bundleURL
+        expect(DenyList.isRunningApp(bundleURL: runningURL, bundleIdentifier: Bundle.main.bundleIdentifier),
+               "isRunningApp: il bundle in esecuzione è riconosciuto")
+        expect(!DenyList.isRunningApp(bundleURL: URL(fileURLWithPath: "/Applications/Safari.app"),
+                                      bundleIdentifier: "com.apple.Safari"),
+               "isRunningApp: altre app non sono il processo corrente")
+
+        let extURL = URL(fileURLWithPath: "/tmp/com.foo.camera-extension")
+        let userRoot = SearchRoots.all.first { !$0.isSystemLevel }!
+        expect(LeftoverFinder.requiresElevation(for: extURL, root: userRoot),
+               "requiresElevation: camera-extension richiede privilegi")
+
         if failures.isEmpty {
-            print("SELFTEST denylist: OK (\(8) controlli)")
+            print("SELFTEST denylist: OK (\(11) controlli)")
             return true
         }
         for message in failures { print("SELFTEST denylist FAIL: \(message)") }
@@ -80,6 +92,71 @@ enum CleanupSelfTest {
     }
 }
 
+enum AppScannerSelfTest {
+    static func run() async -> Bool {
+        let apps = await AppScanner().scanInstalledApps()
+        let mainPath = Bundle.main.bundleURL.resolvingSymlinksInPath().standardizedFileURL.path
+        let mainId = Bundle.main.bundleIdentifier
+        var failures: [String] = []
+        for app in apps {
+            if app.bundleURL.resolvingSymlinksInPath().standardizedFileURL.path == mainPath {
+                failures.append("AppScanner: il bundle in esecuzione compare in lista (\(app.displayName))")
+            }
+            if let mainId, let id = app.bundleIdentifier, mainId.caseInsensitiveCompare(id) == .orderedSame {
+                failures.append("AppScanner: stesso bundle ID del processo corrente (\(id))")
+            }
+        }
+        if failures.isEmpty {
+            print("SELFTEST appscanner: OK (\(apps.count) app, nessuna auto-rimozione)")
+            return true
+        }
+        for message in failures { print("SELFTEST appscanner FAIL: \(message)") }
+        return false
+    }
+}
+
+enum SystemExtensionSelfTest {
+    static func run() -> Bool {
+        var failures: [String] = []
+        func expect(_ condition: Bool, _ message: String) {
+            if !condition { failures.append(message) }
+        }
+
+        let sample = """
+        4 extension(s)
+        --- com.apple.system_extension.cmio
+        enabled\tactive\tteamID\tbundleID (version)\tname\t[state]
+        *\t*\t847R5ZLN8S\tcom.insta360.linkcontroller.camera-extension (1.0.46/46)\tcom.insta360.linkcontroller.camera-extension\t[activated enabled]
+        """
+        let parsed = SystemExtensionService.parseListOutput(sample)
+        expect(parsed.count == 1, "parseListOutput: una riga attesa, trovate \(parsed.count)")
+        if let row = parsed.first {
+            expect(row.teamID == "847R5ZLN8S", "parseListOutput: teamID")
+            expect(row.bundleID == "com.insta360.linkcontroller.camera-extension", "parseListOutput: bundleID")
+            expect(row.isActive, "parseListOutput: stato attivo")
+        }
+
+        let artifact = URL(fileURLWithPath: "/Users/x/Library/Containers/com.foo.camera-extension")
+        expect(SystemExtensionService.bundleId(fromExtensionArtifact: artifact) == "com.foo.camera-extension",
+               "bundleId: container camera-extension")
+
+        let ids = SystemExtensionService.bundleIds(
+            from: [LeftoverItem(url: artifact, category: .containers, sizeBytes: nil,
+                                isSelected: true, requiresElevation: true, matchReason: .bundleIdExact,
+                                launchdLabel: nil, launchdDomain: nil)],
+            auxiliaryIds: ["com.foo.helper"]
+        )
+        expect(ids == ["com.foo.camera-extension", "com.foo.helper"], "bundleIds: unione auxiliary + path")
+
+        if failures.isEmpty {
+            print("SELFTEST systemextension: OK (\(5) controlli)")
+            return true
+        }
+        for message in failures { print("SELFTEST systemextension FAIL: \(message)") }
+        return false
+    }
+}
+
 enum SelfTestRunner {
     static func runIfRequested() {
         let args = CommandLine.arguments
@@ -93,6 +170,13 @@ enum SelfTestRunner {
         if args.contains("--selftest-cleanup") {
             Task.detached { exit(await CleanupSelfTest.run() ? 0 : 1) }
             dispatchMain()
+        }
+        if args.contains("--selftest-appscanner") {
+            Task.detached { exit(await AppScannerSelfTest.run() ? 0 : 1) }
+            dispatchMain()
+        }
+        if args.contains("--selftest-systemextension") {
+            exit(SystemExtensionSelfTest.run() ? 0 : 1)
         }
     }
 }

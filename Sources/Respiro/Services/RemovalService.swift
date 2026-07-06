@@ -13,6 +13,36 @@ struct RemovalError: LocalizedError {
     var errorDescription: String? { message }
 }
 
+enum RemovalErrorMessage {
+    /// macOS NSError strings are English — translate the common cases for the UI.
+    static func humanize(_ raw: String?) -> String {
+        guard let raw, !raw.isEmpty else { return "Rimozione non riuscita." }
+        let l = raw.lowercased()
+        if l.contains("permission") || l.contains("permess") {
+            return "Serve la password di amministratore. Seleziona l'elemento con il lucchetto e riprova."
+        }
+        if l.contains("in use") || l.contains("busy") || l.contains("in uso") {
+            return "Il file è in uso: chiudi l'app e riprova."
+        }
+        return raw
+    }
+
+    static func humanizeAppBundleFailure() -> String {
+        "Non sono riuscito a spostare l'app nel Cestino. Chiudila del tutto (o forza chiusura) e riprova: se compare, inserisci la password di amministratore."
+    }
+
+    static func humanizeElevatedFailure(for url: URL, extensionUninstallAttempted: Bool = false) -> String {
+        let name = url.lastPathComponent.lowercased()
+        if name.hasSuffix(".appex") || name.contains("camera-extension") || name.contains("systemextension") {
+            if extensionUninstallAttempted {
+                return "Estensione ancora registrata dal sistema. Riavvia il Mac per completare la rimozione, oppure disattivala in Impostazioni di Sistema › Generali › Accessori."
+            }
+            return "Estensione di sistema ancora attiva. Chiudi l'app, verifica in Impostazioni di Sistema › Generali › Accessori, poi riprova."
+        }
+        return "Il file non è stato rimosso: potrebbe essere in uso o protetto dal sistema."
+    }
+}
+
 struct RemovalService {
     /// Moves user-owned items to the Trash (recoverable with "Put Back").
     func moveToTrash(_ items: [LeftoverItem]) async -> [RemovalResult] {
@@ -31,7 +61,7 @@ struct RemovalService {
             } catch {
                 results.append(RemovalResult(url: item.url, category: item.category,
                                              success: false,
-                                             errorDescription: error.localizedDescription))
+                                             errorDescription: RemovalErrorMessage.humanize(error.localizedDescription)))
             }
         }
         return results
@@ -51,14 +81,15 @@ struct RemovalService {
                 results.append(RemovalResult(url: url, category: nil, success: true, errorDescription: nil))
             } catch {
                 results.append(RemovalResult(url: url, category: nil, success: false,
-                                             errorDescription: error.localizedDescription))
+                                             errorDescription: RemovalErrorMessage.humanize(error.localizedDescription)))
             }
         }
         return results
     }
 
     func moveAppToTrash(_ app: InstalledApp) async throws {
-        guard !DenyList.isBlockedBundleId(app.bundleIdentifier),
+        guard !DenyList.isRunningApp(bundleURL: app.bundleURL, bundleIdentifier: app.bundleIdentifier),
+              !DenyList.isBlockedBundleId(app.bundleIdentifier),
               DenyList.validateForRemoval(app.bundleURL) else {
             throw RemovalError(message: "Bloccato dalla lista di sicurezza: \(app.bundleURL.path)")
         }

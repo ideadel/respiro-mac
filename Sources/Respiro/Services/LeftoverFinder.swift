@@ -33,8 +33,7 @@ final class LeftoverFinder {
                     }
                 }
                 guard let matchReason = reason else { continue }
-                let requiresElevation = root.isSystemLevel
-                    && !FileManager.default.isDeletableFile(atPath: candidate.path)
+                let requiresElevation = Self.requiresElevation(for: candidate, root: root)
                 items.append(LeftoverItem(url: candidate, category: root.category,
                                           sizeBytes: nil,
                                           isSelected: matchReason != .vendorMatch,
@@ -103,6 +102,17 @@ final class LeftoverFinder {
         case .launchAgentsUser, .launchAgentsSystem: return .userGui
         default: return .system
         }
+    }
+
+    /// App extensions, camera extensions and non-deletable paths need the
+    /// privileged removal path (password prompt), not a plain Trash move.
+    static func requiresElevation(for url: URL, root: SearchRoot) -> Bool {
+        let name = url.lastPathComponent.lowercased()
+        if name.hasSuffix(".appex") { return true }
+        if name.contains("camera-extension") || name.contains("systemextension") { return true }
+        if root.isSystemLevel && !FileManager.default.isDeletableFile(atPath: url.path) { return true }
+        if !root.isSystemLevel && !FileManager.default.isDeletableFile(atPath: url.path) { return true }
+        return false
     }
 
     /// LaunchAgents/LaunchDaemons match only via the plist "Label" key, never

@@ -26,13 +26,13 @@ Leggi `docs/README.md` per l'indice completo della documentazione.
 2. **Lessico** — usa i nomi Respiro (`Aria`, `Trasloco`, `Panorama`…), mai i nomi CleanMyMac (`Smart Scan`, `Space Lens`…).
 3. **Sicurezza** — ogni rimozione passa da `DenyList.validateForRemoval`; non bypassare.
 4. **Registro** — ogni file toccato va in `ActionLogStore`.
-5. **Scope** — non modificare `sevenweb-portal/` da questo repo (è gitignored, repo separato).
+5. **Scope** — non modificare `../sevenweb-portal/` da questo repo (cartella sorella, repo separato).
 
 ## Build e release
 
 ```sh
 ./build-app.sh          # build locale → build/Respiro.app
-./release.sh            # zip + SHA256 → sevenweb-portal/public/downloads/respiro/
+./release.sh            # zip + SHA256 → ../sevenweb-portal/public/downloads/respiro/
 ```
 
 Richiede macOS 13+, SwiftPM, Command Line Tools (no Xcode). Sparkle per auto-update.
@@ -83,4 +83,4 @@ Navigazione: sidebar → `Area` (5 aree) → chip bar → `Module`. Stato in `Ap
 
 - Sito: [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro)
 - Versione: `Resources/Info.plist` → `CFBundleShortVersionString`
-- Dati prodotto portale: `sevenweb-portal/public/data/respiro.json` (repo separato)
+- Dati prodotto portale: `../sevenweb-portal/public/data/respiro.json` (repo separato)

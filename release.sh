@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Resources/Info.plist)
 ZIP_NAME="Respiro-${VERSION}-macOS-arm64.zip"
 DIST="dist"
-PORTAL="${SEVENWEB_PORTAL:-$(dirname "$0")/sevenweb-portal/public/downloads/respiro}"
+PORTAL="${SEVENWEB_PORTAL:-$(dirname "$0")/../sevenweb-portal/public/downloads/respiro}"
 
 ./build-app.sh
 

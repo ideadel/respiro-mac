@@ -19,6 +19,7 @@ enum AppBundleInspector {
         addBundleIds(inDirectory: contents.appendingPathComponent("Library/LoginItems", isDirectory: true))
         addBundleIds(inDirectory: contents.appendingPathComponent("XPCServices", isDirectory: true))
         addBundleIds(inDirectory: contents.appendingPathComponent("PlugIns", isDirectory: true))
+        addBundleIds(inDirectory: contents.appendingPathComponent("Library/SystemExtensions", isDirectory: true))
 
         // Privileged helper convention (SMJobBless): the filename IS the label.
         let launchServices = contents.appendingPathComponent("Library/LaunchServices", isDirectory: true)

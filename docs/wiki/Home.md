@@ -21,6 +21,16 @@ Utility macOS open source per pulizia, disinstallazione e manutenzione. **100% o
 
 ## Principi
 
+## Release 1.2.0
+
+Respiro si aggiorna: ora è distribuito in modo completo **open source** (MIT) e senza gate licenza.
+
+- **Download gratuito** dal portale sevenweb.tv: niente vendita, niente licenze
+- **Trasloco più solido**: quando serve, disinstalla estensioni di sistema senza effetti collaterali
+- **Lessico Respiro** allineato ovunque (Respira, Aria, Trasloco, Tagliando, Panorama, Guardia)
+
+Note complete: **[docs/CHANGELOG.md](../CHANGELOG.md)**
+
 1. **Niente rimozione senza conferma** — tu scegli cosa selezionare
 2. **Cestino, non cancellazione diretta** — quasi tutto è recuperabile
 3. **Numeri onesti** — niente stime gonfiate o allarmismi

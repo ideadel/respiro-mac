@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Domande e discussione
+    url: https://github.com/ideadel/respiro-mac/discussions
+    about: Idee, dubbi d'uso, feedback generale
+  - name: Download e aggiornamenti
+    url: https://sevenweb.tv/apps/respiro/
+    about: Binari firmati, changelog e SHA256

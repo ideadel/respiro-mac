@@ -41,10 +41,9 @@ Checklist manuale (~15 min) da eseguire prima di ogni release. Automazione: `./s
 - [ ] Respira: scan home, link findings
 - [ ] Menu bar: spazio libero visibile
 - [ ] Light e dark mode leggibili
-- [ ] Ko-fi solo in About + messaggio post-pulizia (no modale invasiva)
+- [ ] Ko-fi solo in Impostazioni + pagina prodotto (no modale invasiva)
 
 ## Release
 
 - [ ] `./release.sh` → zip + SHA256
 - [ ] Aggiornare `../sevenweb-portal/public/data/respiro.json` (versione + changelog)
-- [ ] `graphify update Sources/Respiro` se codice Swift cambiato

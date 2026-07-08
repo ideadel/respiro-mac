@@ -98,9 +98,9 @@ Nessun numero gonfiato; stati: `bene`, `viziata`, `corto`.
 
 SwiftPM compila `Sources/Respiro`; risorse in `Sources/Respiro/Resources/`.
 
-## God nodes (graphify)
+## Nodi centrali
 
-Nodi più connessi — punti di ingresso per esplorazione:
+Punti di ingresso utili per esplorare il codice:
 
 1. `LeftoverCategory` — tassonomia residui disinstallazione
 2. `Module` / `Area` — routing UI

@@ -1,6 +1,6 @@
 # Servizi Respiro
 
-Riferimento rapido per `Sources/Respiro/Services/`. Per dipendenze tra simboli usa `graphify explain "<Nome>"`.
+Riferimento rapido per `Sources/Respiro/Services/`.
 
 ## Scanner (producono `[CleanableItem]` o dati)
 

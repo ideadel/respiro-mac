@@ -1,0 +1,18 @@
+name: Domanda o discussione
+description: Domande d'uso, idee, feedback generale
+title: ""
+labels: ["q-a"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Domande su installazione, moduli, permessi o idee in generale.
+        Per bug riproducibili usa le [issue](https://github.com/ideadel/respiro-mac/issues/new?template=bug_report.yml).
+
+  - type: textarea
+    id: message
+    attributes:
+      label: Messaggio
+      placeholder: Versione Respiro, macOS, cosa stai provando a fare…
+    validations:
+      required: true

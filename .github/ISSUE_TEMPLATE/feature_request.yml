@@ -1,0 +1,48 @@
+name: Funzionalità
+description: Proponi un miglioramento o una nuova idea
+title: "[idea]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Prima di aprire: cerca issue/discussioni simili. Respiro privilegia semplicità, trasparenza e zero telemetria.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Che problema risolve?
+      placeholder: "Es. dopo Trasloco resta difficile capire se …"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Come immagini l'esperienza in app? Quale modulo toccherebbe?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Impatto atteso
+      options:
+        - Piccolo (copy, UI locale)
+        - Medio (un modulo)
+        - Grande (architettura / più moduli)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Allineamento con Respiro
+      options:
+        - label: Resta 100% offline (niente chiamate di rete operative)
+          required: true
+        - label: Nessuna rimozione senza conferma esplicita
+          required: true
+        - label: Niente scare-marketing o urgenza artificiale
+          required: true

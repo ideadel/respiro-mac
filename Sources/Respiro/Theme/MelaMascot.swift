@@ -2,7 +2,7 @@ import SwiftUI
 
 /// "Mela" — the friendly MacBook mascot, built from SwiftUI shapes.
 /// States: idle (slow breathing), scanning (pulsing rings + darting eyes),
-/// happy (one bounce). Big on Smart Scan, 26 pt elsewhere.
+/// happy (one bounce). Big on Respira home, 26 pt elsewhere.
 struct MelaMascot: View {
     enum State { case idle, scanning, happy }
 

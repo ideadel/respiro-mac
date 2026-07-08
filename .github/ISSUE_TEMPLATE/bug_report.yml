@@ -1,0 +1,87 @@
+name: Bug
+description: Qualcosa non funziona come previsto
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione. Respiro non invia telemetria: descrivi il problema con il più dettaglio possibile.
+
+  - type: input
+    id: version
+    attributes:
+      label: Versione Respiro
+      placeholder: "es. 1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS
+      placeholder: "es. 15.5 (arm64)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Modulo / area
+      options:
+        - Respira
+        - Aria
+        - Cestino
+        - Zavorra
+        - Panorama
+        - Trasloco
+        - Avvio
+        - Tagliando
+        - Guardia
+        - Diario
+        - Impostazioni / menu bar
+        - Altro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: fda
+    attributes:
+      label: Accesso completo al disco
+      options:
+        - Concesso
+        - Non concesso
+        - Non so
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passi per riprodurre
+      placeholder: |
+        1. Apri Trasloco
+        2. Seleziona …
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento atteso
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamento osservato
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshot, log o note aggiuntive
+      description: Allega immagini trascinandole qui sotto. Per il Registro (Diario) incolla le righe rilevanti.

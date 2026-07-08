@@ -3,8 +3,9 @@ build/
 dist/
 .DS_Store
 .cursor/
+.claude/
 
-# Graphify (indice del codice per Claude Code / Cursor)
+# Strumenti locali di analisi codice (non pubblicati)
 graphify-out/
 Sources/Respiro/graphify-out/
 .graphify/

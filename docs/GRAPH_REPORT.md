@@ -9,9 +9,8 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b0961103`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
+
+Snapshot generato dal commit `b0961103`. Rigenera con gli strumenti interni se la struttura cambia in modo rilevante.
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Core Models & Routing|Core Models & Routing]]
@@ -207,7 +206,7 @@ Nodes (3): Explanations, LeftoverCategory, String
 ## Knowledge Gaps
 - **201 isolated node(s):** `URL`, `Bool`, `String`, `URL`, `preferences` (+196 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **3 thin communities (<3 nodes) omitted from report**
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

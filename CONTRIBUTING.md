@@ -1,24 +1,27 @@
-# Respiro — guida per agenti AI
+# Contribuire a Respiro
 
 Utility macOS (Swift/SwiftUI) per pulizia e manutenzione locale. Zero rete operativa, zero telemetria.
 
-## Prima di esplorare il codice
+## Build
 
-Questo repo ha un **knowledge graph graphify** in `graphify-out/`.
-
-```sh
-graphify query "come funziona il disinstallatore?"
-graphify path "UninstallerView" "LeftoverFinder"
-graphify explain "CleanupEngine"
-```
-
-Dopo modifiche al codice Swift:
+Richiede macOS 13+, SwiftPM e Command Line Tools (no Xcode):
 
 ```sh
-graphify update Sources/Respiro
+./build-app.sh
+open build/Respiro.app
 ```
 
-Leggi `docs/README.md` per l'indice completo della documentazione.
+Verifica automatica:
+
+```sh
+./scripts/verify.sh
+```
+
+Release (zip + checksum → portale):
+
+```sh
+./release.sh
+```
 
 ## Vincoli non negoziabili
 
@@ -26,16 +29,7 @@ Leggi `docs/README.md` per l'indice completo della documentazione.
 2. **Lessico** — usa i nomi Respiro (`Aria`, `Trasloco`, `Panorama`…), mai i nomi CleanMyMac (`Smart Scan`, `Space Lens`…).
 3. **Sicurezza** — ogni rimozione passa da `DenyList.validateForRemoval`; non bypassare.
 4. **Registro** — ogni file toccato va in `ActionLogStore`.
-5. **Scope** — non modificare `../sevenweb-portal/` da questo repo (cartella sorella, repo separato).
-
-## Build e release
-
-```sh
-./build-app.sh          # build locale → build/Respiro.app
-./release.sh            # zip + SHA256 → ../sevenweb-portal/public/downloads/respiro/
-```
-
-Richiede macOS 13+, SwiftPM, Command Line Tools (no Xcode). Sparkle per auto-update.
+5. **Scope** — il sito vive in `../sevenweb-portal/` (repo separato); modifiche al portale solo se legate alla release.
 
 ## Struttura sorgente
 
@@ -49,7 +43,7 @@ Sources/Respiro/
 └── Theme/                 # Palette, AuroraBackground, MelaMascot
 ```
 
-## Moduli (routing)
+## Moduli
 
 | `Module` enum | UI | Scanner / servizio principale |
 |---|---|---|
@@ -66,6 +60,24 @@ Sources/Respiro/
 
 Navigazione: sidebar → `Area` (5 aree) → chip bar → `Module`. Stato in `AppRoute`.
 
+## Come contribuire
+
+1. **Fork** del repository
+2. Crea un branch: `git checkout -b fix/trasloco-messaggio`
+3. Modifica il codice rispettando i [guardrail di copy](design/COPY-GUARDRAILS.md)
+4. Esegui `./scripts/verify.sh`
+5. Apri una **Pull Request** verso `main` (template incluso)
+
+Per cambiamenti grandi, apri prima una [Discussion](https://github.com/ideadel/respiro-mac/discussions) o un'issue.
+
+## Wiki
+
+Le pagine utente sono in [docs/wiki/](docs/wiki/). Per pubblicarle sulla GitHub Wiki:
+
+```sh
+./scripts/publish-wiki.sh
+```
+
 ## Documentazione
 
 | File | Contenuto |
@@ -74,13 +86,11 @@ Navigazione: sidebar → `Area` (5 aree) → chip bar → `Module`. Stato in `Ap
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layer, flussi, dipendenze |
 | [docs/MODULES.md](docs/MODULES.md) | Moduli, view, view model |
 | [docs/SERVICES.md](docs/SERVICES.md) | Servizi e responsabilità |
-| [docs/GRAPHIFY.md](docs/GRAPHIFY.md) | Comandi graphify per questo repo |
-| [docs/GRAPH_REPORT.md](docs/GRAPH_REPORT.md) | Report graphify (552 nodi, 36 community) |
 | [docs/QA-CHECKLIST.md](docs/QA-CHECKLIST.md) | Checklist manuale pre-release |
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | Versioni e note portale |
 
-## Distribuzione
+## Licenza e distribuzione
 
-- Sito: [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro)
-- Versione: `Resources/Info.plist` → `CFBundleShortVersionString`
-- Dati prodotto portale: `../sevenweb-portal/public/data/respiro.json` (repo separato)
+- Codice: [MIT](LICENSE)
+- Binario: scaricabile gratis da [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro)
+- Sostegno opzionale: [Ko-fi](https://ko-fi.com/sevenwebtv)

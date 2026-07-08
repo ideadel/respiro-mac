@@ -1,36 +1,26 @@
-# End User License Agreement — Respiro
+# Respiro — note sull'uso del software
 
-**Effective date:** 2026-07-05  
-**Licensor:** SevenWeb (sevenweb.tv)
+**Effective date:** 2026-07-08  
+**Author:** SevenWeb (sevenweb.tv)
 
-## 1. Grant
+Respiro è distribuito **gratuitamente** come software open source sotto licenza [MIT](../LICENSE).
 
-Upon purchase of a valid license key, you receive a non-exclusive, non-transferable license to use Respiro on Mac computers you own or control. One key may be activated on a reasonable number of personal devices (typically up to 3).
+## Uso
 
-## 2. One-time purchase
+Puoi usare, modificare e ridistribuire il codice secondo i termini MIT. I binari scaricati da sevenweb.tv sono forniti senza costo.
 
-Respiro is sold as a **one-time purchase**, not a subscription. Updates within the same major version are included. Major upgrades (e.g. 1.x → 2.x) may require a new purchase unless otherwise stated at launch.
+## Privacy
 
-## 3. Grandfathering (1.x)
+Respiro opera offline. Nessuna telemetria, nessun account obbligatorio.
 
-Users who obtained Respiro **1.x free of charge** before the paid 2.0 launch may continue using their 1.x copy without a license key. This does not grant rights to 2.x without purchase.
+## Responsabilità
 
-## 4. Restrictions
+Il software è fornito **"così com'è"**, senza garanzie. Sei responsabile dei backup prima di qualsiasi pulizia o disinstallazione. I file rimossi finiscono nel Cestino (recuperabili) salvo svuotamento esplicito.
 
-You may not redistribute, resell, or sublicense the application or license keys. Reverse engineering for circumvention of license checks is prohibited.
+## Sostegno
 
-## 5. Privacy
+Le donazioni su [Ko-fi](https://ko-fi.com/sevenwebtv) sono facoltative e non influenzano le funzioni dell'app.
 
-Respiro operates offline. License validation is performed locally on your Mac. No usage telemetry is collected.
+## Contatto
 
-## 6. Disclaimer
-
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY. See MIT-style disclaimers for liability limits. You are responsible for backups before any cleanup or uninstall operation.
-
-## 7. Refunds
-
-EU consumers: 14-day withdrawal right where applicable. Contact the seller via the purchase platform (Lemon Squeezy) for refund requests.
-
-## 8. Contact
-
-sevenweb.tv · Ko-fi: ko-fi.com/sevenwebtv
+sevenweb.tv · [GitHub](https://github.com/ideadel/respiro-mac)

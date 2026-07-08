@@ -1,55 +1,115 @@
 # Respiro
 
-Utility macOS per pulizia e manutenzione del sistema — 100% locale, zero rete, zero telemetria.
+**Il tuo Mac non dovrebbe pagare un canone per respirare.**
 
-Distribuito su [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro) — **in arrivo** (acquisto una tantum, niente abbonamento). Le build 1.x già scaricate restano utilizzabili (grandfathering).
+Respiro è un'utility macOS per pulizia, disinstallazione e manutenzione — **100% offline**, senza telemetria e senza account. È **open source** ([MIT](LICENSE)) e la distribuisce **[SevenWeb](https://sevenweb.tv)**.
 
-Modello commerciale: [`docs/MONETIZATION.md`](docs/MONETIZATION.md) · EULA: [`docs/EULA.md`](docs/EULA.md)
+<p align="center">
+  <a href="https://sevenweb.tv/apps/respiro/">
+    <img src="https://sevenweb.tv/assets/screenshots/respira.png" alt="Respiro — schermata Respira" width="720">
+  </a>
+</p>
 
-Sorgente privato: [github.com/ideadel/respiro-mac](https://github.com/ideadel/respiro-mac)
+<p align="center">
+  <a href="https://sevenweb.tv/apps/respiro/"><img src="https://img.shields.io/badge/Scarica-sevenweb.tv-34C87E?style=for-the-badge" alt="Scarica da sevenweb.tv"></a>
+  <a href="https://github.com/ideadel/respiro-mac"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT"></a>
+  <a href="https://github.com/ideadel/respiro-mac/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ideadel/respiro-mac/ci.yml?branch=main&style=for-the-badge" alt="CI"></a>
+</p>
 
-## Build
+---
 
-Richiede solo i Command Line Tools (nessun Xcode):
+## Scarica Respiro
+
+Le build ufficiali, il changelog e l'hash **SHA256** sono sul portale — non qui su GitHub.
+
+| | |
+|---|---|
+| **Pagina prodotto** | [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro/) |
+| **Download diretto** | [Respiro 1.2.0 (arm64)](https://sevenweb.tv/downloads/respiro/Respiro-1.2.0-macOS-arm64.zip) |
+| **Catalogo software** | [sevenweb.tv/apps](https://sevenweb.tv/apps/) |
+| **Chi sono / SevenWeb** | [sevenweb.tv/about](https://sevenweb.tv/about/) |
+
+**Requisiti:** macOS 13+, Apple Silicon (arm64).
+
+**Primo avvio:** click destro su `Respiro.app` → **Apri** (firma ad-hoc). Poi concedi **Accesso completo al disco** in Impostazioni di Sistema → Privacy e sicurezza.
+
+Guida passo passo: [docs/wiki/Installazione.md](docs/wiki/Installazione.md)
+
+---
+
+## Cosa fa
+
+Respiro ti aiuta a capire cosa occupa spazio sul Mac e a liberarlo **solo dove decidi tu**. Niente rimozioni automatiche, niente allarmismi: ogni file passa dal Cestino (recuperabile) e ogni azione finisce nel **Diario**.
+
+| Area | Moduli |
+|------|--------|
+| **Respira** | Home — disco, RAM, CPU e panoramica leggera |
+| **Spazio** | **Aria** (cache), **Cestino**, **Zavorra** (ingombranti e doppioni), **Panorama** (mappa disco) |
+| **App** | **Trasloco** — disinstalla un'app e rivedi i residui prima di toglierli |
+| **Energia** | **Avvio**, **Tagliando**, **Guardia** |
+| **Diario** | Statistiche, registro file per file, timeline **Scia** |
+
+Approfondimenti: [docs/wiki/Moduli.md](docs/wiki/Moduli.md)
+
+---
+
+## Perché esiste
+
+Respiro nasce su [SevenWeb](https://sevenweb.tv) con un'idea semplice: **software fatto a mano, che resta tuo** — senza abbonamenti, senza telemetria, senza account.
+
+- **Trasparenza** — confermi tu cosa rimuovere; niente numeri gonfiati
+- **Privacy** — tutto resta sul Mac; nessun dato inviato a server
+- **Open source** — puoi leggere, verificare e contribuire al [codice](https://github.com/ideadel/respiro-mac)
+- **Gratis** — il download dal portale non costa nulla
+
+Se Respiro ti è utile, puoi offrire un caffè su **[Ko-fi](https://ko-fi.com/sevenwebtv)** — è facoltativo e **non sblocca funzioni**.
+
+---
+
+## Per gli utenti
+
+| Bisogno | Dove |
+|---------|------|
+| Scaricare / aggiornamenti | [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro/) |
+| Domande d'uso | [GitHub Discussions](https://github.com/ideadel/respiro-mac/discussions) |
+| Segnalare un bug | [Issue](https://github.com/ideadel/respiro-mac/issues/new?template=bug_report.yml) |
+| Wiki | [docs/wiki/Home.md](docs/wiki/Home.md) |
+| Supporto | [SUPPORT.md](SUPPORT.md) |
+
+---
+
+## Per chi sviluppa
+
+Questo repository contiene il sorgente Swift/SwiftUI. Il sito e i binari release vivono sul [portale SevenWeb](https://sevenweb.tv) (repo separato).
 
 ```sh
-./build-app.sh
-open build/Respiro.app
+git clone https://github.com/ideadel/respiro-mac.git
+cd respiro-mac
+./build-app.sh          # → build/Respiro.app
+./scripts/verify.sh     # self-test
 ```
 
-**Primo avvio**: concedi **Accesso completo al disco** in Impostazioni di Sistema → Privacy e Sicurezza → Accesso completo al disco.
-
-**Firma ad-hoc**: al primo avvio, click destro sull'app → Apri.
-
-## Release
+Release ufficiale (zip + checksum → portale):
 
 ```sh
-./release.sh
+./release.sh   # copia in ../sevenweb-portal/public/downloads/respiro/
 ```
 
-Copia lo zip in `../sevenweb-portal/public/downloads/respiro/` per il deploy del portale.
+Leggi [CONTRIBUTING.md](CONTRIBUTING.md) prima di aprire una PR. Architettura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Moduli
-
-Respira, Aria, Cestino, Zavorra (Ingombranti + Doppioni), Panorama, Trasloco, Avvio, Tagliando, Guardia, Diario — più Menu bar.
-
-## Documentazione (agenti AI)
-
-- [AGENTS.md](AGENTS.md) — entry point per Cursor/Claude
-- [docs/](docs/) — architettura, moduli, servizi, graphify
-
-Aggiornare il grafo codice dopo modifiche Swift:
-
-```sh
-graphify update Sources/Respiro
-```
-
-Verifica pre-release:
-
-```sh
-./scripts/verify.sh
-```
+---
 
 ## Licenza
 
-Vedi [LICENSE](LICENSE) (MIT, codice/sorgente dove applicabile). Il **binario distribuito** è soggetto a [EULA](docs/EULA.md). Il sorgente resta privato.
+Codice sorgente: [MIT](LICENSE).
+
+Il binario scaricato da [sevenweb.tv](https://sevenweb.tv/apps/respiro/) è gratuito. Note d'uso: [docs/EULA.md](docs/EULA.md).
+
+---
+
+<p align="center">
+  <a href="https://sevenweb.tv">sevenweb.tv</a> ·
+  <a href="https://sevenweb.tv/apps/respiro/">Respiro</a> ·
+  <a href="https://github.com/ideadel/respiro-mac">GitHub</a> ·
+  <a href="https://ko-fi.com/sevenwebtv">Ko-fi</a>
+</p>

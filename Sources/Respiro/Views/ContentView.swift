@@ -22,25 +22,19 @@ struct ContentView: View {
     @StateObject private var startupVM = StartupViewModel()
     @StateObject private var maintenanceVM = MaintenanceViewModel()
     @StateObject private var spaceLensVM = SpaceLensViewModel()
-    @State private var isLicensed = LicenseService.isLicensed
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            RespiroMainShell(
-                junk: junkVM,
-                largeFiles: largeFilesVM,
-                duplicates: duplicatesVM,
-                protection: protectionVM,
-                trash: trashVM,
-                startup: startupVM,
-                maintenance: maintenanceVM,
-                spaceLens: spaceLensVM
-            )
-            .environmentObject(route)
-            if LicenseService.requiresLicense && !isLicensed {
-                LicenseActivationView { isLicensed = true }
-            }
-        }
+        RespiroMainShell(
+            junk: junkVM,
+            largeFiles: largeFilesVM,
+            duplicates: duplicatesVM,
+            protection: protectionVM,
+            trash: trashVM,
+            startup: startupVM,
+            maintenance: maintenanceVM,
+            spaceLens: spaceLensVM
+        )
+        .environmentObject(route)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .respiroWindow()
     }

@@ -6,40 +6,17 @@ struct SettingsView: View {
     @AppStorage(BackgroundScanScheduler.Keys.thresholdMB) private var thresholdMB = 1024
     @State private var launchAtLogin = BackgroundScanScheduler.shared.launchAtLoginEnabled
     @State private var launchAtLoginError: String?
-    @State private var licenseKey = LicenseService.storedKey ?? ""
-    @State private var licenseMessage: String?
-    @State private var licenseOK = LicenseService.isLicensed
     @ObservedObject private var scheduler = BackgroundScanScheduler.shared
 
     var body: some View {
         Form {
-            if LicenseService.requiresLicense {
-                Section("Licenza") {
-                    if licenseOK {
-                        Label("Licenza attiva", systemImage: "checkmark.seal.fill")
-                            .foregroundStyle(Palette.success)
-                        if let key = LicenseService.storedKey {
-                            Text(masked(key))
-                                .font(.system(size: 11, design: .monospaced))
-                                .foregroundStyle(Palette.textSecondary)
-                        }
-                        Button("Rimuovi licenza da questo Mac") {
-                            LicenseService.deactivate()
-                            licenseKey = ""
-                            licenseOK = false
-                        }
-                    } else {
-                        TextField("Chiave licenza", text: $licenseKey)
-                            .font(.system(.body, design: .monospaced))
-                        Button("Attiva") { activateLicense() }
-                        if let licenseMessage {
-                            Text(licenseMessage)
-                                .font(.system(size: 11))
-                                .foregroundStyle(licenseOK ? Palette.success : Palette.danger)
-                        }
-                        Link("Acquista su sevenweb.tv", destination: URL(string: "https://sevenweb.tv/apps/respiro/")!)
-                    }
-                }
+            Section("Respiro") {
+                Link("Codice sorgente (GitHub)", destination: URL(string: "https://github.com/ideadel/respiro-mac")!)
+                Link("Scarica aggiornamenti · sevenweb.tv", destination: URL(string: "https://sevenweb.tv/apps/respiro/")!)
+                Link("Offrimi un caffè su Ko-fi", destination: URL(string: "https://ko-fi.com/sevenwebtv")!)
+                Text("Respiro è gratuito e open source (MIT). Le donazioni sono facoltative.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Palette.textSecondary)
             }
 
             Section("Accesso al disco") {
@@ -118,21 +95,5 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 440)
         .navigationTitle("Impostazioni")
-    }
-
-    private func activateLicense() {
-        if LicenseService.activate(licenseKey) {
-            licenseOK = true
-            licenseMessage = "Licenza attivata."
-        } else {
-            licenseOK = false
-            licenseMessage = "Chiave non valida."
-        }
-    }
-
-    private func masked(_ key: String) -> String {
-        let parts = key.split(separator: "-")
-        guard parts.count >= 3 else { return key }
-        return "\(parts[0])-\(parts[1])-****-\(parts.last ?? "")"
     }
 }

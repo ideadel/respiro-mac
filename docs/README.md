@@ -1,48 +1,40 @@
 # Documentazione Respiro
 
-Indice per sviluppatori e agenti AI che lavorano su **Respiro** (cartella `respiro`, repo `respiro-mac`).
+## Wiki (utenti e contributor)
 
-## Knowledge graph (graphify)
+| Pagina | Contenuto |
+|--------|-----------|
+| [wiki/Home.md](wiki/Home.md) | Indice wiki |
+| [wiki/Installazione.md](wiki/Installazione.md) | Download, permessi, primo avvio |
+| [wiki/Moduli.md](wiki/Moduli.md) | Guida ai moduli |
+| [wiki/Permessi.md](wiki/Permessi.md) | FDA, admin, estensioni |
+| [wiki/FAQ.md](wiki/FAQ.md) | Domande frequenti |
+| [wiki/Sviluppo.md](wiki/Sviluppo.md) | Build e test |
+| [wiki/Sicurezza-e-privacy.md](wiki/Sicurezza-e-privacy.md) | Deny list, registro |
 
-Il grafo del codice Swift vive in `graphify-out/` (generato, non committato).
+Pubblicazione su GitHub Wiki: `./scripts/publish-wiki.sh`
 
-| Artefatto | Descrizione |
-|---|---|
-| `graphify-out/graph.json` | Grafo completo (598 nodi AST, 779 edge dopo clustering) |
-| `graphify-out/GRAPH_REPORT.md` | Copia committata in [GRAPH_REPORT.md](GRAPH_REPORT.md) |
-| `graphify-out/graph.html` | Visualizzazione interattiva |
-| [GRAPH_TREE.html](GRAPH_TREE.html) | Albero D3 collapsible per cartelle |
-
-Comandi: vedi [GRAPHIFY.md](GRAPHIFY.md).
-
-## Guide
-
-| Documento | Quando leggerlo |
-|---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Panoramica layer, navigazione, pipeline rimozione |
-| [MODULES.md](MODULES.md) | Mapping enum → UI → scanner |
-| [SERVICES.md](SERVICES.md) | Riferimento servizi in `Sources/Respiro/Services/` |
-| [GRAPHIFY.md](GRAPHIFY.md) | Aggiornare e interrogare il grafo |
-| [GRAPH_REPORT.md](GRAPH_REPORT.md) | Hub del grafo, god nodes, community |
-
-## Design e copy (repo root)
+## Riferimento tecnico
 
 | File | Contenuto |
-|---|---|
-| [docs/CHANGELOG.md](CHANGELOG.md) | Versioni |
-| [docs/QA-CHECKLIST.md](QA-CHECKLIST.md) | Checklist pre-release |
-| [design/COPY-GUARDRAILS.md](../design/COPY-GUARDRAILS.md) | Regole copy/UX |
-| `design/CLAUDE-DESIGN-BRIEF.md` | Brief visivo |
-| `design/SEVENWEB-PORTAL-PROMPT.md` | Prompt portale sevenweb.tv |
+|------|-----------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Layer, flussi, dipendenze |
+| [MODULES.md](MODULES.md) | Moduli, view, view model |
+| [SERVICES.md](SERVICES.md) | Servizi e responsabilità |
+| [GRAPH_REPORT.md](GRAPH_REPORT.md) | Snapshot struttura codice |
+| [QA-CHECKLIST.md](QA-CHECKLIST.md) | Checklist pre-release |
+| [CHANGELOG.md](CHANGELOG.md) | Versioni |
+| [MONETIZATION.md](MONETIZATION.md) | Open source + Ko-fi |
+| [EULA.md](EULA.md) | Note d'uso binario |
 
-## Entry point agenti
+## Entry point
 
-- [AGENTS.md](../AGENTS.md) — riassunto operativo per Cursor/Claude/Codex
-- `.cursor/rules/` — regole Cursor (graphify + contesto Respiro)
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — build, PR, vincoli
+- [design/COPY-GUARDRAILS.md](../design/COPY-GUARDRAILS.md) — copy e UX
 
-## Aggiornare la documentazione
+## Release
 
-1. Modifica codice Swift
-2. `graphify update Sources/Respiro`
-3. `graphify cluster-only Sources/Respiro --no-label` (se serve rigenerare report)
-4. Copia `graphify-out/GRAPH_REPORT.md` → `docs/GRAPH_REPORT.md` se cambia in modo rilevante
+1. `./scripts/verify.sh`
+2. Bump `Resources/Info.plist`
+3. `./release.sh`
+4. Aggiorna `../sevenweb-portal/public/data/respiro.json`

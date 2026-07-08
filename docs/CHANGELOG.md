@@ -1,5 +1,15 @@
 # Changelog Respiro
 
+## 1.2.0 (2026-07-08)
+
+### Prodotto
+- **Open source** (MIT) — [github.com/ideadel/respiro-mac](https://github.com/ideadel/respiro-mac)
+- Download **gratuito** da [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro) — niente vendita, niente licenze
+- Donazione facoltativa su [Ko-fi](https://ko-fi.com/sevenwebtv)
+- Rimosso gate licenza e UI acquisto; Trasloco migliorato per estensioni di sistema
+
+---
+
 ## 1.1.4 (2026-07-06)
 
 ### UI
@@ -66,7 +76,7 @@
 
 ## 1.0.0 (2026-07-04)
 
-Release iniziale Respiro 2.0 — lessico proprio, home narrativa, trasparenza radicale.
+Release iniziale su sevenweb.tv — lessico proprio, home narrativa, trasparenza radicale.
 
 ### Portale (sevenweb-portal)
 

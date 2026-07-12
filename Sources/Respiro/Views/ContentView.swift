@@ -8,11 +8,13 @@ struct ContentView: View {
     }
     @StateObject private var largeFilesVM = CleanupListViewModel(computesSizes: false,
                                                                  historyLabel: "zavorra") {
-        await LargeFilesScanner().scan()
+        let roots = await VolumeSelectionStore.shared.largeFileRoots
+        return await LargeFilesScanner().scan(roots: roots)
     }
     @StateObject private var duplicatesVM = CleanupListViewModel(computesSizes: false,
                                                                  historyLabel: "zavorra") {
-        await DuplicateScanner().scan()
+        let roots = await VolumeSelectionStore.shared.duplicateRoots
+        return await DuplicateScanner().scan(roots: roots)
     }
     @StateObject private var protectionVM = CleanupListViewModel(computesSizes: false,
                                                                  historyLabel: "guardia") {
@@ -43,6 +45,7 @@ struct ContentView: View {
 /// Shell layout — fixed chrome band on top, sidebar and content below.
 private struct RespiroMainShell: View {
     @EnvironmentObject private var route: AppRoute
+    @ObservedObject private var volumeStore = VolumeSelectionStore.shared
     @State private var revealed = false
 
     @ObservedObject var junk: CleanupListViewModel
@@ -111,6 +114,22 @@ private struct RespiroMainShell: View {
     private var areaView: some View {
         let multiModule = route.area.modules.count > 1
         VStack(spacing: 0) {
+            // The disk comes first: which volume are we analyzing?
+            if route.area == .spazio {
+                VolumeBar(store: volumeStore)
+                    .padding(.horizontal, Metrics.windowPadding)
+                    .padding(.top, 10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if volumeStore.isExternalSelected,
+                   route.module == .aria || route.module == .cestino {
+                    Text("Questo modulo riguarda il volume di avvio: per analizzare il disco esterno usa Zavorra o Panorama.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Palette.warning)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, Metrics.windowPadding)
+                        .padding(.top, 6)
+                }
+            }
             if multiModule {
                 ModuleChipBar(modules: route.area.modules, selection: $route.module)
                     .padding(.horizontal, Metrics.windowPadding)
@@ -208,17 +227,27 @@ struct ModuleChipBar: View {
     }
 }
 
-/// Zavorra: large files and duplicates as two tabs of one page.
+/// Zavorra: large files and duplicates as two tabs of one page. Scans follow
+/// the volume selected in the VolumeBar.
 struct ZavorraView: View {
     @ObservedObject var largeFiles: CleanupListViewModel
     @ObservedObject var duplicates: CleanupListViewModel
+    @ObservedObject private var volumeStore = VolumeSelectionStore.shared
     @State private var tab = 0
 
     var body: some View {
         VStack(spacing: 0) {
             SubModuleChipBar(titles: ["Ingombranti", "Doppioni"], selection: $tab)
+                .onChange(of: volumeStore.selected?.url) { _ in
+                    Task {
+                        await largeFiles.scan()
+                        await duplicates.scan()
+                    }
+                }
             if tab == 0 {
-                Text("File oltre 100 MB nelle cartelle utente. Nessuno è preselezionato.")
+                Text(volumeStore.isExternalSelected
+                     ? "File oltre 100 MB su \(volumeStore.selected?.name ?? "disco esterno"). Nessuno è preselezionato."
+                     : "File oltre 100 MB nelle cartelle utente. Nessuno è preselezionato.")
                     .font(.system(size: 11))
                     .foregroundStyle(Palette.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -232,7 +261,9 @@ struct ZavorraView: View {
                     reassurance: "Do solo un'occhiata: non tocco niente finché non scegli tu.",
                     viewModel: largeFiles)
             } else {
-                Text("File identici (SHA-256) in Download, Documenti e Scrivania.")
+                Text(volumeStore.isExternalSelected
+                     ? "File identici (SHA-256) su \(volumeStore.selected?.name ?? "disco esterno")."
+                     : "File identici (SHA-256) in Download, Documenti e Scrivania.")
                     .font(.system(size: 11))
                     .foregroundStyle(Palette.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)

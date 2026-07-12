@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SpaceLensView: View {
     @ObservedObject var viewModel: SpaceLensViewModel
+    @ObservedObject private var volumeStore = VolumeSelectionStore.shared
 
     var body: some View {
         VStack(spacing: 14) {
@@ -19,7 +20,10 @@ struct SpaceLensView: View {
             }
         }
         .padding(Metrics.windowPadding)
-        .onAppear { viewModel.loadIfNeeded() }
+        .onAppear { viewModel.adopt(volumeStore.selected) }
+        .onChange(of: volumeStore.selected?.url) { _ in
+            viewModel.adopt(volumeStore.selected)
+        }
     }
 
     private var header: some View {
@@ -27,22 +31,23 @@ struct SpaceLensView: View {
             HStack(alignment: .top) {
                 Spacer()
                 Button {
+                    volumeStore.refresh()
                     viewModel.load()
                 } label: {
                     Label("Aggiorna", systemImage: "arrow.clockwise")
                 }
                 .buttonStyle(.plain).foregroundStyle(Palette.accent)
             }
-            if let stats = DiskUsageService.volumeStats() {
-                Text("Volume di avvio · \(formatBytes(stats.total - stats.free)) usati · \(formatBytes(stats.free)) liberi")
+            if let volume = viewModel.selectedVolume {
+                Text("\(volume.name) · \(formatBytes(volume.total - volume.free)) usati · \(formatBytes(volume.free)) liberi")
                     .font(.system(size: 11))
                     .foregroundStyle(Palette.textSecondary)
-                let used = Double(stats.total - stats.free)
+                let used = Double(volume.total - volume.free)
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Palette.border)
                         Capsule().fill(Palette.accent)
-                            .frame(width: proxy.size.width * used / Double(stats.total))
+                            .frame(width: proxy.size.width * used / Double(max(volume.total, 1)))
                     }
                 }
                 .frame(height: 8)

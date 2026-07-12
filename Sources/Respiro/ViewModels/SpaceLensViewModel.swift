@@ -6,30 +6,42 @@ final class SpaceLensViewModel: ObservableObject {
     @Published var entries: [DiskEntry] = []
     @Published var isLoading = false
     @Published var message: String?
+    @Published var selectedVolume: VolumeInfo?
 
     private let service = DiskUsageService()
     private var loadTask: Task<Void, Never>?
 
-    /// Space Lens browses the whole volume, so deletion gets its own guard
-    /// instead of DenyList's search-root allowlist: only strict descendants
-    /// of the user's home can be trashed, never the home or ~/Library roots.
+    /// Space Lens browses whole volumes, so deletion gets its own guard
+    /// instead of DenyList's search-root allowlist. Trashable: strict
+    /// descendants of the user's home (never home itself or ~/Library), and
+    /// strict descendants of non-boot volumes (never the mount point) —
+    /// each external volume has its own per-volume Trash.
     nonisolated static func canTrash(_ url: URL) -> Bool {
         if DenyList.isBlockedPath(url) { return false }
         let resolved = url.resolvingSymlinksInPath().standardizedFileURL
-        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
         let components = resolved.pathComponents
+
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
         let homeComponents = home.pathComponents
-        guard components.count > homeComponents.count,
-              Array(components.prefix(homeComponents.count)) == homeComponents
+        if components.count > homeComponents.count,
+           Array(components.prefix(homeComponents.count)) == homeComponents {
+            let library = home.appendingPathComponent("Library").standardizedFileURL
+            return resolved != library
+        }
+
+        // External/secondary volume: allowed below the mount point, but the
+        // mount point itself and anything on the boot filesystem are not.
+        guard let values = try? resolved.resourceValues(forKeys: [.volumeURLKey, .volumeIsRootFileSystemKey]),
+              values.volumeIsRootFileSystem == false,
+              let mountPoint = values.volume?.standardizedFileURL
         else { return false }
-        let library = home.appendingPathComponent("Library").standardizedFileURL
-        return resolved != library
+        return components.count > mountPoint.pathComponents.count
     }
 
     func moveToTrash(_ entry: DiskEntry) async {
         message = nil
         guard Self.canTrash(entry.url) else {
-            message = "Per sicurezza Space Lens può cestinare solo elementi dentro la tua cartella Inizio."
+            message = "Per sicurezza Panorama può cestinare solo elementi dentro la tua cartella Inizio o su un disco esterno."
             return
         }
         do {
@@ -50,6 +62,23 @@ final class SpaceLensViewModel: ObservableObject {
         if entries.isEmpty && !isLoading { load() }
     }
 
+    /// Follows the shared VolumeBar selection: reloads when the volume
+    /// actually changes (also covers ejection — the store falls back to the
+    /// boot volume and this reloads accordingly).
+    func adopt(_ volume: VolumeInfo?) {
+        guard let volume else { return }
+        if selectedVolume?.url != volume.url {
+            selectedVolume = volume
+            // The boot volume opens on the home folder (the interesting part
+            // — the rest is mostly SIP-protected); external drives open at
+            // the root.
+            load(volume.isBootVolume ? FileManager.default.homeDirectoryForCurrentUser : volume.url)
+        } else {
+            selectedVolume = volume // refresh free/total numbers
+            if entries.isEmpty && !isLoading { load() }
+        }
+    }
+
     func load(_ directory: URL? = nil) {
         if let directory { currentDirectory = directory }
         loadTask?.cancel()
@@ -64,7 +93,14 @@ final class SpaceLensViewModel: ObservableObject {
         }
     }
 
-    var canGoUp: Bool { currentDirectory.pathComponents.count > 1 }
+    var canGoUp: Bool {
+        // On an external drive the mount point is the top; going further up
+        // would land in /Volumes on the boot disk.
+        if let volume = selectedVolume, !volume.isBootVolume {
+            return currentDirectory.standardizedFileURL != volume.url.standardizedFileURL
+        }
+        return currentDirectory.pathComponents.count > 1
+    }
 
     func goUp() {
         guard canGoUp else { return }

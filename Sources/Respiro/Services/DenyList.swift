@@ -3,8 +3,27 @@ import Foundation
 /// Safety-critical hard exclusions. Checked at scan time AND re-checked
 /// immediately before every removal command (defense in depth).
 enum DenyList {
-    static let blockedPathPrefixes = ["/System", "/Library/Apple"]
+    static let blockedPathPrefixes = [
+        "/System", "/Library/Apple", "/usr", "/bin", "/sbin", "/private/var/db",
+    ]
     static let blockedBundleIdPrefixes = ["com.apple."]
+
+    /// Componenti di path (nome cartella esatto) che non si toccano mai.
+    static let blockedPathComponents: Set<String> = [
+        "Mobile Documents",
+        "Keychains",
+        "Messages",
+        "Mail",
+        "Accounts",
+        "IdentityServices",
+        "HomeKit",
+        "Passwords",
+        "Photos Library.photoslibrary",
+        ".ssh",
+        ".gnupg",
+        ".aws",
+        "com.apple.TCC",
+    ]
 
     static func isBlockedBundleId(_ bundleId: String?) -> Bool {
         guard let id = bundleId?.lowercased() else { return false }
@@ -28,7 +47,15 @@ enum DenyList {
     /// Checked against the symlink-resolved path to prevent symlink-escape bypass.
     static func isBlockedPath(_ url: URL) -> Bool {
         let resolved = url.resolvingSymlinksInPath().path
-        return blockedPathPrefixes.contains { resolved.hasPrefix($0) }
+        if blockedPathPrefixes.contains(where: { resolved == $0 || resolved.hasPrefix($0 + "/") }) {
+            return true
+        }
+        return containsBlockedFragment(resolved)
+    }
+
+    static func containsBlockedFragment(_ path: String) -> Bool {
+        let components = URL(fileURLWithPath: path).pathComponents
+        return components.contains { blockedPathComponents.contains($0) }
     }
 
     /// User content folders the large-files and duplicate scanners operate on.
@@ -50,6 +77,7 @@ enum DenyList {
             home.appendingPathComponent("Applications", isDirectory: true),
             home.appendingPathComponent("Library/Developer", isDirectory: true),
             URL(fileURLWithPath: "/Library/Caches", isDirectory: true),
+            home.appendingPathComponent("Library/Logs/DiagnosticReports", isDirectory: true),
         ]
         let components = resolved.pathComponents
         for parent in allowedParents {

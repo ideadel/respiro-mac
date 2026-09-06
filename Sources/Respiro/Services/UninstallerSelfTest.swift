@@ -27,6 +27,35 @@ enum UninstallerSelfTest {
                                           vendorToken: "zoom") == nil,
                "ReceiptService: i pacchetti Apple non devono mai matchare")
 
+        let foo = InstalledApp(bundleIdentifier: "com.foo.app", displayName: "Team",
+                               bundleURL: URL(fileURLWithPath: "/Applications/Team.app"), version: nil)
+        expect(LeftoverFinder.matchReason(candidateName: "com.foo.app", app: foo,
+                                          allowNameMatch: false) == .bundleIdExact,
+               "match: bundle id esatto")
+        expect(LeftoverFinder.matchReason(candidateName: "com.foo.app.plist", app: foo,
+                                          allowNameMatch: false) == .bundleIdPrefix,
+               "match: suffisso bundle id")
+        expect(LeftoverFinder.matchReason(candidateName: "ABC123.com.foo.app", app: foo,
+                                          allowNameMatch: false) == .bundleIdPrefix,
+               "match: group container TEAMID.bundle")
+        expect(LeftoverFinder.matchReason(candidateName: "backup-com.foo.app-old", app: foo,
+                                          allowNameMatch: false) == nil,
+               "match: substring nel mezzo non è un residuo")
+        expect(LeftoverFinder.matchReason(candidateName: "mycom.foo.app.legacy", app: foo,
+                                          allowNameMatch: false) == nil,
+               "match: collisioni per contains() non devono matchare")
+        expect(LeftoverFinder.matchReason(candidateName: "TeamViewer", app: foo,
+                                          allowNameMatch: true) == .nameMatch,
+               "match: solo nome resta disponibile")
+        expect(MatchReason.nameMatch.shouldSelectByDefault == false,
+               "nameMatch deve partire deselezionato")
+        expect(MatchReason.vendorMatch.shouldSelectByDefault == false,
+               "vendorMatch deve partire deselezionato")
+        expect(MatchReason.bundleIdExact.shouldSelectByDefault,
+               "bundleIdExact resta preselezionato")
+        expect(ReceiptService.matchReason(packageId: "com.other.com.foo.app.extra", app: foo) == nil,
+               "ReceiptService: contains() non deve matchare un package id estraneo")
+
         // Fixture app must exist.
         let home = FileManager.default.homeDirectoryForCurrentUser
         let fixtureURL = home.appendingPathComponent("Applications/RespiroFixture.app", isDirectory: true)
@@ -109,6 +138,10 @@ enum UninstallerSelfTest {
         let vendor = items.first { $0.url.lastPathComponent == "Respirotest" }
         expect(vendor?.matchReason == .vendorMatch, "Cartella vendor non marcata come vendorMatch")
         expect(vendor?.isSelected == false, "Vendor match deve partire deselezionato")
+
+        let named = items.first { $0.url.lastPathComponent == "RespiroFixture" && $0.category == .appSupport }
+        expect(named?.matchReason == .nameMatch, "Application Support matchato solo per nome")
+        expect(named?.isSelected == false, "nameMatch deve partire deselezionato")
 
         if failures.isEmpty {
             print("SELFTEST OK — \(items.count) residui trovati, \(expected.count) attesi verificati")

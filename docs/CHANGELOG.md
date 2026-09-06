@@ -1,5 +1,15 @@
 # Changelog Respiro
 
+## 1.2.1 (2026-09-06)
+
+### Aria
+- Non propone più cache Apple protette (Safari, HomeKit, Family Circle, `com.apple.*`) che SIP impedisce di toccare
+- Non elenca file inesistenti né i report della fixture di test
+- Se un file è già sparito, la rimozione conta come riuscita — niente falsi errori
+- Cache di sistema (`/Library/Caches`) tolte dalla lista: se non possiamo spostarle nel Cestino, non le mostriamo
+
+---
+
 ## 1.2.0 (2026-07-08)
 
 ### Prodotto

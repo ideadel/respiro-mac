@@ -18,13 +18,20 @@ enum RemovalErrorMessage {
     static func humanize(_ raw: String?) -> String {
         guard let raw, !raw.isEmpty else { return "Rimozione non riuscita." }
         let l = raw.lowercased()
-        if l.contains("permission") || l.contains("permess") {
-            return "Serve la password di amministratore. Seleziona l'elemento con il lucchetto e riprova."
+        if isPermissionFailure(raw) {
+            return "Questo file è protetto: Respiro chiederà la password di amministratore e riproverà."
         }
         if l.contains("in use") || l.contains("busy") || l.contains("in uso") {
             return "Il file è in uso: chiudi l'app e riprova."
         }
         return raw
+    }
+
+    static func isPermissionFailure(_ raw: String?) -> Bool {
+        guard let raw, !raw.isEmpty else { return false }
+        let l = raw.lowercased()
+        return l.contains("permission") || l.contains("permess") || l.contains("not permitted")
+            || l.contains("password di amministratore")
     }
 
     static func humanizeAppBundleFailure() -> String {
@@ -54,6 +61,11 @@ struct RemovalService {
                                              errorDescription: "Bloccato dalla lista di sicurezza"))
                 continue
             }
+            if !FileManager.default.fileExists(atPath: item.url.path) {
+                results.append(RemovalResult(url: item.url, category: item.category,
+                                             success: true, errorDescription: nil))
+                continue
+            }
             do {
                 try FileManager.default.trashItem(at: item.url, resultingItemURL: nil)
                 results.append(RemovalResult(url: item.url, category: item.category,
@@ -74,6 +86,10 @@ struct RemovalService {
             guard DenyList.validateForRemoval(url) else {
                 results.append(RemovalResult(url: url, category: nil, success: false,
                                              errorDescription: "Bloccato dalla lista di sicurezza"))
+                continue
+            }
+            if !FileManager.default.fileExists(atPath: url.path) {
+                results.append(RemovalResult(url: url, category: nil, success: true, errorDescription: nil))
                 continue
             }
             do {

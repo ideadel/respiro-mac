@@ -4,26 +4,39 @@ import Foundation
 /// Trash directly, root-owned ones through a single admin prompt.
 struct CleanupEngine {
     func remove(items: [CleanableItem]) async -> (results: [RemovalResult], banner: String?) {
+        let plannedElevated = items.filter(\.requiresElevation)
         let normal = items.filter { !$0.requiresElevation }
-        let elevated = items.filter(\.requiresElevation)
         var results = await RemovalService().moveToTrash(urls: normal.map(\.url))
         var banner: String?
-        if !elevated.isEmpty {
+
+        let permissionRetries = results.filter {
+            !$0.success && RemovalErrorMessage.isPermissionFailure($0.errorDescription)
+        }
+        let elevatedURLs = plannedElevated.map(\.url) + permissionRetries.map(\.url)
+
+        if !elevatedURLs.isEmpty {
             do {
-                let outcome = try await PrivilegedRemovalService().removeElevated(paths: elevated.map(\.url))
-                results += elevated.map {
-                    let removed = outcome.removedPaths.contains($0.url.path)
-                    return RemovalResult(url: $0.url, category: nil, success: removed,
-                                         errorDescription: removed ? nil : "Il file non è stato rimosso")
+                let outcome = try await PrivilegedRemovalService().removeElevated(paths: elevatedURLs)
+                results.removeAll { result in
+                    permissionRetries.contains(where: { $0.url == result.url })
+                }
+                results += (plannedElevated.map(\.url) + permissionRetries.map(\.url)).map { url in
+                    let removed = outcome.removedPaths.contains(url.path)
+                    return RemovalResult(url: url, category: nil, success: removed,
+                                         errorDescription: removed ? nil
+                                         : "Non è stato possibile spostarlo nel Cestino, nemmeno con i privilegi di amministratore.")
                 }
             } catch {
                 if case ElevationError.userCancelled = error {
-                    banner = "Rimozione con privilegi annullata — gli elementi di sistema non sono stati toccati."
+                    banner = "Rimozione con privilegi annullata — i file protetti non sono stati toccati."
                 } else {
                     banner = error.localizedDescription
                 }
-                results += elevated.map {
-                    RemovalResult(url: $0.url, category: nil, success: false,
+                results.removeAll { result in
+                    permissionRetries.contains(where: { $0.url == result.url })
+                }
+                results += elevatedURLs.map {
+                    RemovalResult(url: $0, category: nil, success: false,
                                   errorDescription: error.localizedDescription)
                 }
             }

@@ -51,8 +51,18 @@ enum DenyListSelfTest {
         expect(LeftoverFinder.requiresElevation(for: extURL, root: userRoot),
                "requiresElevation: camera-extension richiede privilegi")
 
+        let photos = home.appendingPathComponent("Pictures/Photos Library.photoslibrary")
+        expect(DenyList.isBlockedPath(photos) || !DenyList.validateForRemoval(photos),
+               "validateForRemoval: libreria Foto non è rimovibile")
+        expect(!DenyList.validateForRemoval(home.appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs")),
+               "validateForRemoval: iCloud Drive non è rimovibile")
+        expect(!DenyList.validateForRemoval(home.appendingPathComponent("Library/Keychains/login.keychain-db")),
+               "validateForRemoval: portachiavi non è rimovibile")
+        expect(!DenyList.validateForRemoval(home.appendingPathComponent(".ssh/id_ed25519")),
+               "validateForRemoval: chiavi SSH non sono rimovibili")
+
         if failures.isEmpty {
-            print("SELFTEST denylist: OK (\(11) controlli)")
+            print("SELFTEST denylist: OK")
             return true
         }
         for message in failures { print("SELFTEST denylist FAIL: \(message)") }
@@ -68,11 +78,47 @@ enum CleanupSelfTest {
         }
 
         let items = await JunkScanner().scan()
-        let blocked = items.filter { DenyList.isBlockedPath($0.url) }
+        let blocked = items.filter { DenyList.isBlockedPath($0.url) || !DenyList.validateForRemoval($0.url) }
         expect(blocked.isEmpty,
-               "JunkScanner: nessun path deny-listato (\(blocked.count) trovati)")
+               "JunkScanner: nessun path deny-listato o non validabile (\(blocked.count) trovati)")
+
+        let cautiousGroups = Set(["Stato applicazioni salvato", "Allegati Mail", "Archivi Xcode"])
+        let wronglySelected = items.filter { cautiousGroups.contains($0.group) && $0.isSelected }
+        expect(wronglySelected.isEmpty,
+               "JunkScanner: gruppi da confermare non devono partire selezionati (\(wronglySelected.count))")
+
+        expect(JunkScanner.shouldSkipCacheName("com.apple.bird") == true,
+               "JunkScanner: cache iCloud (bird) esclusa")
+        expect(JunkScanner.shouldSkipCacheName("com.apple.Photos") == true,
+               "JunkScanner: cache Foto esclusa")
+        expect(JunkScanner.shouldSkipCacheName("com.apple.Safari") == true,
+               "JunkScanner: cache Safari Apple esclusa")
+        expect(JunkScanner.shouldSkipCacheName("com.apple.HomeKit") == true,
+               "JunkScanner: cache HomeKit esclusa")
+        expect(JunkScanner.shouldSkipCacheName("familycircled") == true,
+               "JunkScanner: familycircled escluso")
+        expect(JunkScanner.shouldSkipCacheName("RespiroFixture-2026-07-01-120000.ips") == true,
+               "JunkScanner: report della fixture escluso")
+        expect(JunkScanner.shouldSkipCacheName("com.example.browser") == false,
+               "JunkScanner: cache app normali restano visibili")
+        expect(JunkScanner.isOfferable(URL(fileURLWithPath: "/tmp/respiro-does-not-exist-\(UUID().uuidString)")) == false,
+               "JunkScanner: file inesistenti non si offrono")
+
+        expect(JunkScanner.requiresElevation(for: URL(fileURLWithPath: "/Library/Caches/foo"),
+                                             systemLevel: true),
+               "JunkScanner: cache di sistema richiedono sempre privilegi")
+        let humanized = RemovalErrorMessage.humanize("You don’t have permission to access some of the items.")
+        expect(!humanized.contains("lucchetto"),
+               "humanize: non deve chiedere il lucchetto in Aria")
+        expect(RemovalErrorMessage.isPermissionFailure(humanized),
+               "isPermissionFailure: riconosce l'errore di permesso")
 
         let home = FileManager.default.homeDirectoryForCurrentUser
+        let mailDownload = home.appendingPathComponent(
+            "Library/Containers/com.apple.mail/Data/Library/Mail Downloads/respiro-test.pdf")
+        expect(DenyList.validateForRemoval(mailDownload),
+               "validateForRemoval: allegati Mail Downloads restano consentiti")
+
         let tmpFile = home.appendingPathComponent("Downloads/.respiro-cleanup-selftest.txt")
         do {
             try "fixture".write(to: tmpFile, atomically: true, encoding: .utf8)

@@ -25,13 +25,22 @@ struct CleanupModuleView: View {
         }
         .task { await viewModel.scanIfNeeded() }
         .confirmationDialog(
-            "Spostare nel Cestino \(viewModel.selectedItems.count) elementi (\(formatBytes(viewModel.selectedSize)))?",
+            confirmTitle,
             isPresented: $showConfirm, titleVisibility: .visible
         ) {
             Button(actionLabel, role: .destructive) {
                 Task { await viewModel.performRemoval() }
             }
         }
+    }
+
+    private var confirmTitle: String {
+        let count = viewModel.selectedItems.count
+        let size = formatBytes(viewModel.selectedSize)
+        if viewModel.selectedItems.contains(where: \.requiresElevation) {
+            return "Spostare nel Cestino \(count) elementi (\(size))? I file con il lucchetto chiedono la password di amministratore."
+        }
+        return "Spostare nel Cestino \(count) elementi (\(size))?"
     }
 
     private var removingOverlay: some View {

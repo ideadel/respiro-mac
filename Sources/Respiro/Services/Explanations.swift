@@ -14,11 +14,17 @@ enum Explanations {
         case "Stato applicazioni salvato":
             return "La \"fotografia\" delle finestre aperte all'ultima chiusura. Rimuovendola, le app ripartiranno pulite invece di riaprire le finestre di prima."
         case "Junk di Xcode":
-            return "File temporanei di compilazione (DerivedData, archivi). Xcode li rigenera al prossimo build: sono lo spazio più facile da recuperare per chi sviluppa."
+            return "File temporanei di compilazione (DerivedData, DeviceSupport, cache Simulator). Xcode li rigenera quando servono."
+        case "Archivi Xcode":
+            return "Build firmati (.xcarchive) che tieni per l'App Store o per debug. Non sono cache: selezionali solo se sei sicuro di non servirtene."
+        case "Simulatori iOS":
+            return "Dispositivi virtuali di Xcode, con i dati delle app di prova. Partono deselezionati: toccali solo se vuoi ripartire da zero."
         case "Allegati Mail":
-            return "Copie locali degli allegati già scaricati. Le mail originali restano sul server: riaprendo l'allegato, Mail lo riscarica."
-        case "Cache di sistema":
-            return "Cache condivise da tutte le app. macOS le ricrea quando servono; rimuoverle è sicuro ma richiede la password di amministratore."
+            return "Copie locali degli allegati già scaricati. Le mail originali restano sul server: riaprendo l'allegato, Mail lo riscarica. Partono deselezionati."
+        case "Report di crash":
+            return "Rapporti .ips/.crash che macOS tiene per gli sviluppatori. Se il Mac funziona, puoi liberartene."
+        case "Residui orfani":
+            return "Cartelle con il bundle id di un'app che non risulta più installata. Partono deselezionate: controlla prima, potrebbero essere dati che vuoi tenere."
         default:
             return nil
         }
@@ -42,7 +48,7 @@ extension LeftoverCategory {
         case .containers:
             return "La \"stanza\" isolata dove macOS teneva i dati dell'app (sandbox). Senza l'app resta vuota e inutile."
         case .groupContainers:
-            return "Dati condivisi tra l'app e le sue estensioni o altre app dello stesso produttore."
+            return "Dati condivisi tra l'app e le sue estensioni o altre app dello stesso produttore. Se hai ancora un'altra app dello stesso fornitore, questa voce parte deselezionata."
         case .launchAgentsUser, .launchAgentsSystem:
             return "Un processo che partiva da solo al login per conto dell'app. Senza l'app non serve più."
         case .launchDaemons:

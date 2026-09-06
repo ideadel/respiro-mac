@@ -59,6 +59,9 @@ enum MatchReason: Equatable {
         }
     }
 
+    /// COPY-GUARDRAILS: match deboli (solo nome / fornitore) partono deselezionati.
+    var shouldSelectByDefault: Bool { isHighConfidence }
+
     var badge: String {
         switch self {
         case .bundleIdExact: return "bundle id"

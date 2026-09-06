@@ -34,9 +34,11 @@ final class LeftoverFinder {
                 }
                 guard let matchReason = reason else { continue }
                 let requiresElevation = Self.requiresElevation(for: candidate, root: root)
+                let sharedGroup = root.category == .groupContainers && vendorToken == nil
+                    && Self.vendorToken(from: app.bundleIdentifier ?? "") != nil
                 items.append(LeftoverItem(url: candidate, category: root.category,
                                           sizeBytes: nil,
-                                          isSelected: matchReason != .vendorMatch,
+                                          isSelected: matchReason.shouldSelectByDefault && !sharedGroup,
                                           requiresElevation: requiresElevation,
                                           matchReason: matchReason,
                                           launchdLabel: launchdLabel,
@@ -55,12 +57,11 @@ final class LeftoverFinder {
         let c = candidateName.lowercased()
         if let bundleId = app.bundleIdentifier?.lowercased(), !bundleId.isEmpty {
             if c == bundleId { return .bundleIdExact }
-            // Covers suffixed variants ("com.foo.App.plist", ".savedState") and
-            // group-container names ("TEAMID.com.foo.App").
-            if c.hasPrefix(bundleId) || c.contains(bundleId) { return .bundleIdPrefix }
+            if matchesBundleIdentity(c, bundleId: bundleId) { return .bundleIdPrefix }
         }
-        for auxId in auxIds where c == auxId || c.hasPrefix(auxId + ".") || c.contains(auxId) {
-            return .helperBundleId
+        for auxId in auxIds {
+            let id = auxId.lowercased()
+            if c == id || matchesBundleIdentity(c, bundleId: id) { return .helperBundleId }
         }
         if allowNameMatch {
             let d = app.displayName.lowercased().replacingOccurrences(of: " ", with: "")
@@ -72,6 +73,23 @@ final class LeftoverFinder {
         // Vendor folders only on exact equality: "Google" yes, "GoogleUpdater" no.
         if let vendor = vendorToken, c == vendor { return .vendorMatch }
         return nil
+    }
+
+    /// Exact identity, dotted suffix (`com.foo.app.plist`) or group-container
+    /// `TEAMID.com.foo.app`. Mai una substring casuale nel mezzo del nome.
+    static func matchesBundleIdentity(_ candidate: String, bundleId: String) -> Bool {
+        let c = candidate.lowercased()
+        let id = bundleId.lowercased()
+        guard !id.isEmpty else { return false }
+        if c == id { return true }
+        if c.hasPrefix(id + ".") { return true }
+        guard let range = c.range(of: "." + id) else { return false }
+        let prefix = String(c[..<range.lowerBound])
+        guard prefix.range(of: "^[A-Za-z0-9]{6,12}$", options: .regularExpression) != nil else {
+            return false
+        }
+        let after = String(c[range.upperBound...])
+        return after.isEmpty || after.hasPrefix(".")
     }
 
     /// Second bundle-id component ("com.VENDOR.app"), filtered against

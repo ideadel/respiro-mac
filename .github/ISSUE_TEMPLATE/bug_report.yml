@@ -12,7 +12,7 @@ body:
     id: version
     attributes:
       label: Versione Respiro
-      placeholder: "es. 1.2.0"
+      placeholder: "es. 1.2.1"
     validations:
       required: true
 

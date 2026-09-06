@@ -25,7 +25,7 @@ Le build ufficiali, il changelog e l'hash **SHA256** sono sul portale — non qu
 | | |
 |---|---|
 | **Pagina prodotto** | [sevenweb.tv/apps/respiro](https://sevenweb.tv/apps/respiro/) |
-| **Download diretto** | [Respiro 1.2.0 (arm64)](https://sevenweb.tv/downloads/respiro/Respiro-1.2.0-macOS-arm64.zip) |
+| **Download diretto** | [Respiro 1.2.1 (arm64)](https://sevenweb.tv/downloads/respiro/Respiro-1.2.1-macOS-arm64.zip) |
 | **Catalogo software** | [sevenweb.tv/apps](https://sevenweb.tv/apps/) |
 | **Chi sono / SevenWeb** | [sevenweb.tv/about](https://sevenweb.tv/about/) |
 

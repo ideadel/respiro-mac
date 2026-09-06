@@ -18,7 +18,7 @@ struct ReceiptService {
                 url: URL(fileURLWithPath: "/var/db/receipts/\(packageId).plist"),
                 category: .pkgReceipts,
                 sizeBytes: 0,
-                isSelected: reason != .vendorMatch,
+                isSelected: reason.shouldSelectByDefault,
                 requiresElevation: true,
                 matchReason: reason,
                 kind: .packageReceipt(packageId)
@@ -33,9 +33,11 @@ struct ReceiptService {
         guard !p.hasPrefix("com.apple.") else { return nil }
         if let bundleId = app.bundleIdentifier?.lowercased(), !bundleId.isEmpty {
             if p == bundleId { return .bundleIdExact }
-            if p.hasPrefix(bundleId) || p.contains(bundleId) { return .bundleIdPrefix }
+            if LeftoverFinder.matchesBundleIdentity(p, bundleId: bundleId) { return .bundleIdPrefix }
         }
-        if auxIds.contains(where: { p == $0 || p.contains($0) }) { return .helperBundleId }
+        if auxIds.contains(where: { LeftoverFinder.matchesBundleIdentity(p, bundleId: $0) }) {
+            return .helperBundleId
+        }
         // Vendor receipts ("us.zoom.pkg.videomeeting" for bundle "us.zoom.xos")
         // need a recognizable piece of the app name too, otherwise far too broad.
         if let vendor = vendorToken, p.contains(".\(vendor).") || p.hasPrefix("\(vendor).") || p.hasSuffix(".\(vendor)") {

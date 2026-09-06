@@ -59,7 +59,19 @@ else
   codesign --force -s - "$APP"
 fi
 
+# Sostituisci sempre la copia in /Applications (quella che usi dal Launchpad).
+DEST="/Applications/Respiro.app"
+osascript -e 'quit app "Respiro"' >/dev/null 2>&1 || true
+rm -rf "$DEST"
+ditto "$APP" "$DEST"
+# Firma di nuovo sul path finale: ditto può invalidare la firma ad-hoc.
+if [[ -n "$DEVELOPER_ID" ]]; then
+  codesign --force --options runtime -s "$DEVELOPER_ID" "$DEST"
+else
+  codesign --force -s - "$DEST"
+fi
+
 echo "✅ Build completata: $PWD/$APP"
-echo "   Apri con: open $APP"
-echo "   Se vedi «Respiro 2» nel menu, elimina le copie vecchie in /Applications e ~/Applications."
+echo "✅ Installata in $DEST"
+echo "   Apri con: open $DEST"
 echo "   Ricorda: concedi Full Disk Access in Impostazioni di Sistema → Privacy e Sicurezza."

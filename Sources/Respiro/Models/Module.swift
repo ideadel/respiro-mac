@@ -47,7 +47,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
         case .aria: return "Cache, log e file che le app ricreano da sole. Tutto nel Cestino, recuperabile."
         case .cestino: return "Quanto pesa il Cestino e quando vuoi svuotarlo."
         case .zavorra: return "File ingombranti e doppioni: tu scegli cosa spostare."
-        case .panorama: return "Dove finiscono i gigabyte, cartella per cartella."
+        case .panorama: return "Dove finiscono i gigabyte. Entra, torna indietro, e vedi cosa si può togliere con calma."
         case .trasloco: return "Disinstalla un'app e rivedi cosa lascia indietro."
         case .avvio: return "Cosa parte insieme al Mac — disattiva o rimuovi dal Cestino."
         case .tagliando: return "Piccole manutenzioni periodiche, quando ti va."

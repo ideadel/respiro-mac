@@ -1,5 +1,15 @@
 # Changelog Respiro
 
+## 1.2.2 (2026-09-06)
+
+### Panorama
+- Si torna alla cartella superiore: pulsante Indietro (`⌘[`), percorso cliccabile e riga in lista
+- Un tap apre la cartella (niente più doppio click)
+- In cima, le tre voci più grandi da rivedere: **Si ricrea**, **Rivedi**, **Tieni**
+- Non si sale più sopra casa o sopra il disco esterno
+
+---
+
 ## 1.2.1 (2026-09-06)
 
 ### Aria

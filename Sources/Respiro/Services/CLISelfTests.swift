@@ -203,6 +203,39 @@ enum SystemExtensionSelfTest {
     }
 }
 
+enum SpaceLensSelfTest {
+    static func run() -> Bool {
+        var failures: [String] = []
+        func expect(_ condition: Bool, _ message: String) {
+            if !condition { failures.append(message) }
+        }
+
+        let home = URL(fileURLWithPath: "/Users/demo", isDirectory: true)
+        let documents = URL(fileURLWithPath: "/Users/demo/Documents", isDirectory: true)
+        let parent = SpaceLensViewModel.parent(of: documents, root: home)
+        expect(parent?.standardizedFileURL.path == home.standardizedFileURL.path,
+               "parent: Documents deve risalire a Inizio")
+        expect(SpaceLensViewModel.parent(of: home, root: home) == nil,
+               "parent: Inizio non ha un livello sopra")
+
+        let realHome = FileManager.default.homeDirectoryForCurrentUser
+        let caches = realHome.appendingPathComponent("Library/Caches", isDirectory: true)
+        expect(SpaceAdvice.classify(caches, isDirectory: true) == .regenerable,
+               "advice: Caches è rigenerabile")
+        expect(SpaceAdvice.classify(home.appendingPathComponent("Pictures"), isDirectory: true) == .keep,
+               "advice: Immagini si tengono")
+        expect(SpaceAdvice.classify(home.appendingPathComponent("Downloads"), isDirectory: true) == .review,
+               "advice: Download da rivedere")
+
+        if failures.isEmpty {
+            print("SELFTEST panorama: OK")
+            return true
+        }
+        for message in failures { print("SELFTEST panorama FAIL: \(message)") }
+        return false
+    }
+}
+
 enum SelfTestRunner {
     static func runIfRequested() {
         let args = CommandLine.arguments
@@ -223,6 +256,9 @@ enum SelfTestRunner {
         }
         if args.contains("--selftest-systemextension") {
             exit(SystemExtensionSelfTest.run() ? 0 : 1)
+        }
+        if args.contains("--selftest-panorama") {
+            exit(SpaceLensSelfTest.run() ? 0 : 1)
         }
     }
 }

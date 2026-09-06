@@ -7,6 +7,8 @@ final class SpaceLensViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var message: String?
     @Published var selectedVolume: VolumeInfo?
+    /// Cartelle da cui siamo scesi: serve per tornare indietro in modo affidabile.
+    @Published private(set) var trail: [URL] = []
 
     private let service = DiskUsageService()
     private var loadTask: Task<Void, Never>?
@@ -69,6 +71,7 @@ final class SpaceLensViewModel: ObservableObject {
         guard let volume else { return }
         if selectedVolume?.url != volume.url {
             selectedVolume = volume
+            trail = []
             // The boot volume opens on the home folder (the interesting part
             // — the rest is mostly SIP-protected); external drives open at
             // the root.
@@ -93,17 +96,78 @@ final class SpaceLensViewModel: ObservableObject {
         }
     }
 
-    var canGoUp: Bool {
-        // On an external drive the mount point is the top; going further up
-        // would land in /Volumes on the boot disk.
+    var navigationRoot: URL {
         if let volume = selectedVolume, !volume.isBootVolume {
-            return currentDirectory.standardizedFileURL != volume.url.standardizedFileURL
+            return volume.url.resolvingSymlinksInPath().standardizedFileURL
         }
-        return currentDirectory.pathComponents.count > 1
+        return FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
+    }
+
+    var canGoUp: Bool {
+        !trail.isEmpty || Self.parent(of: currentDirectory, root: navigationRoot) != nil
+    }
+
+    var breadcrumbs: [URL] {
+        trail + [currentDirectory]
+    }
+
+    /// Le voci più grandi che di solito si possono togliere senza perdere lavoro.
+    var guidedHints: [DiskEntry] {
+        entries
+            .filter { SpaceAdvice.classify($0.url, isDirectory: $0.isDirectory) != .keep }
+            .prefix(3)
+            .map { $0 }
+    }
+
+    func open(_ url: URL) {
+        let current = currentDirectory.standardizedFileURL
+        let next = url.standardizedFileURL
+        guard next != current else { return }
+        trail.append(currentDirectory)
+        load(url)
+    }
+
+    func goToBreadcrumb(_ url: URL) {
+        let target = url.standardizedFileURL
+        if let index = trail.firstIndex(where: { $0.standardizedFileURL == target }) {
+            trail = Array(trail.prefix(index))
+            load(url)
+            return
+        }
+        if target == currentDirectory.standardizedFileURL { return }
+        goUp()
     }
 
     func goUp() {
-        guard canGoUp else { return }
-        load(currentDirectory.deletingLastPathComponent())
+        if let previous = trail.popLast() {
+            load(previous)
+            return
+        }
+        guard let parent = Self.parent(of: currentDirectory, root: navigationRoot) else { return }
+        load(parent)
+    }
+
+    func title(for url: URL) -> String {
+        let standardized = url.standardizedFileURL
+        if standardized == FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL {
+            return "Inizio"
+        }
+        if let volume = selectedVolume, standardized == volume.url.standardizedFileURL {
+            return volume.name
+        }
+        let name = url.lastPathComponent
+        return name.isEmpty ? url.path : name
+    }
+
+    nonisolated static func parent(of url: URL, root: URL) -> URL? {
+        let current = url.resolvingSymlinksInPath().standardizedFileURL
+        let rootURL = root.resolvingSymlinksInPath().standardizedFileURL
+        guard current.path != rootURL.path else { return nil }
+        let parent = current.deletingLastPathComponent().standardizedFileURL
+        if parent.path == rootURL.path { return parent }
+        if parent.path.hasPrefix(rootURL.path.hasSuffix("/") ? rootURL.path : rootURL.path + "/") {
+            return parent
+        }
+        return nil
     }
 }

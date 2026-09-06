@@ -21,6 +21,10 @@ Utility macOS open source per pulizia, disinstallazione e manutenzione. **100% o
 
 ## Principi
 
+## Release 1.2.2
+
+Panorama ora si naviga come una cartella vera: **Indietro**, percorso cliccabile, un tap per entrare. In cima vedi cosa si può togliere con calma (**Si ricrea**, **Rivedi**, **Tieni**).
+
 ## Release 1.2.0
 
 Respiro si aggiorna: ora è distribuito in modo completo **open source** (MIT) e senza gate licenza.

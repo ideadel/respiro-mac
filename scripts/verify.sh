@@ -25,4 +25,7 @@ echo "▸ --selftest-appscanner"
 echo "▸ --selftest-systemextension"
 "$BIN" --selftest-systemextension
 
+echo "▸ --selftest-panorama"
+"$BIN" --selftest-panorama
+
 echo "✅ verify OK"
